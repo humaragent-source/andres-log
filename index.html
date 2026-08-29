@@ -181,6 +181,46 @@
       width: auto;
       display: block;
     }
+
+    .video {
+      position: relative;
+      width: 100%;
+      padding-top: 56.25%;
+      margin-top: 12px;
+      background: #111;
+    }
+    .video iframe {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border: 0;
+    }
+    .git { margin-top: 22px; }
+    .git-label {
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--mute);
+      margin-bottom: 8px;
+    }
+    .git ol { list-style: none; }
+    .git li {
+      display: grid;
+      grid-template-columns: 92px 1fr;
+      gap: 14px;
+      align-items: baseline;
+      font-size: 14px;
+      padding: 10px 0;
+      border-top: 1px solid var(--hair);
+    }
+    .git time {
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--mute);
+    }
+    .git a { text-decoration: underline; text-underline-offset: 4px; }
     @media (max-width: 700px) {
       .wrap { padding: 20px 18px 72px; }
       article { grid-template-columns: 1fr; gap: 10px; padding: 36px 0; }
@@ -232,6 +272,11 @@
             <button type="button" data-src="covers/coastal-grade-2.jpg" data-alt="Coastal Grade scores and 60-minute map"><img src="covers/coastal-grade-2.jpg" alt="" /></button>
           </div>
         </div>
+        <div class="git" data-git="humaragent-source/coastal-grade">
+          <p class="git-label">On GitHub · latest on this repo</p>
+          <ol></ol>
+        </div>
+
       </div>
     </article>
 
@@ -240,6 +285,13 @@
       <div>
         <h2><a href="https://x.com/TrustWallet/status/2090847233612902845">Trust Talks S3E1 — Cash App Pay, onramps &amp; self-custody</a></h2>
         <p class="dek">Trust Wallet × MoonPay. Live with Tati. Hosted by Jake.</p>
+        <div class="clip" data-clip>
+          <div class="clip-text">
+            <p class="body">I went on Trust Talks S3E1 with Tati from Trust Wallet, hosted by Jake. The hour was Cash App Pay, onramps, and how you actually get someone into self-custody instead of leaving them stuck at the exchange.</p>
+            <p class="body">Live on X on 21 Aug 2026. I was there for MoonPay. The live recording, the announce post, and the broadcast are all linked below. Watch those if you want the conversation, not a recap.</p>
+          </div>
+          <button type="button" class="clip-more" data-clip-toggle>Read more</button>
+        </div>
         <p class="sources">
           <a href="https://x.com/TrustWallet/status/2090847233612902845">Live</a>
           <a href="https://x.com/TrustWallet/status/2090481818797543507">Announce</a>
@@ -260,6 +312,13 @@
       <div>
         <h2><a href="https://www.youtube.com/watch?v=pV-Sem9TRIE">The Invisible Rails of Crypto Adoption</a></h2>
         <p class="dek">ETH Milan panel. MoonPay + Trust Wallet.</p>
+        <div class="clip" data-clip>
+          <div class="clip-text">
+            <p class="body">On stage at ETH Milan for The Invisible Rails of Crypto Adoption. MoonPay panel with Trust Wallet. The talk is the layer nobody photographs: onramps, payouts, the rails that have to work before crypto feels like a normal payment.</p>
+            <p class="body">May 2026. Full session is on YouTube. That is the source of record, not a clip.</p>
+          </div>
+          <button type="button" class="clip-more" data-clip-toggle>Read more</button>
+        </div>
         <p class="sources">
           <a href="https://www.youtube.com/watch?v=pV-Sem9TRIE">YouTube</a>
         </p>
@@ -270,6 +329,9 @@
             <button type="button" data-src="covers/eth-milan-2.jpg" data-alt="ETH Milan panel, second still"><img src="covers/eth-milan-2.jpg" alt="" /></button>
           </div>
         </div>
+        <div class="video">
+          <iframe src="https://www.youtube.com/embed/pV-Sem9TRIE" title="The Invisible Rails of Crypto Adoption" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen loading="lazy"></iframe>
+        </div>
       </div>
     </article>
 
@@ -278,6 +340,13 @@
       <div>
         <h2><a href="https://x.com/moonpay/status/2036539540542828758">Crypto Neo Banks / Headless Apple Pay</a></h2>
         <p class="dek">Solana Accelerate Fintech Series. NYC.</p>
+        <div class="clip" data-clip>
+          <div class="clip-text">
+            <p class="body">I presented at Solana Accelerate Fintech Series in New York on 24 Mar 2026. Headless Apple Pay. Crypto neo banks. Deposits. The point was not a demo for its own sake. It was how a bank-like experience actually takes money in without making the user feel they left the app they already trust.</p>
+            <p class="body">MoonPay posted from the room. I wrote it up the same day on LinkedIn. Both are linked below.</p>
+          </div>
+          <button type="button" class="clip-more" data-clip-toggle>Read more</button>
+        </div>
         <p class="sources">
           <a href="https://x.com/moonpay/status/2036539540542828758">MoonPay post</a>
           <a href="https://www.linkedin.com/posts/andreslamothe_yesterday-i-had-the-privilege-of-presenting-activity-7442593812398448640-QC9o">LinkedIn</a>
@@ -297,6 +366,13 @@
       <div>
         <h2><a href="https://www.youtube.com/watch?v=qX5kvVNgMoQ">Could Crypto Wallets Replace Your Bank Account?</a></h2>
         <p class="dek">Ryder One Stories. Interview + unboxing.</p>
+        <div class="clip" data-clip>
+          <div class="clip-text">
+            <p class="body">Ryder One Stories asked whether a crypto wallet replaces a bank account. Interview plus unboxing, 19 Mar 2026. I walked through self-custody versus the account people already have, and what has to be true before a wallet feels like the place your money lives.</p>
+            <p class="body">Full conversation is on YouTube. That is the piece to watch, not a quote pulled out of it.</p>
+          </div>
+          <button type="button" class="clip-more" data-clip-toggle>Read more</button>
+        </div>
         <p class="sources">
           <a href="https://www.youtube.com/watch?v=qX5kvVNgMoQ">YouTube</a>
         </p>
@@ -307,6 +383,9 @@
             <button type="button" data-src="covers/ryder-2.jpg" data-alt="Ryder One Stories, second still"><img src="covers/ryder-2.jpg" alt="" /></button>
           </div>
         </div>
+        <div class="video">
+          <iframe src="https://www.youtube.com/embed/qX5kvVNgMoQ" title="Could Crypto Wallets Replace Your Bank Account?" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen loading="lazy"></iframe>
+        </div>
       </div>
     </article>
 
@@ -315,6 +394,13 @@
       <div>
         <h2><a href="https://www.xgames.com/news/global-action-sports-team-rosters-officially-locked-for-four-x-games-clubs-at-first-ever-moonpay-x-games-league-draft/">MoonPay X Games League Draft</a></h2>
         <p class="dek">Cosm LA. Inaugural XGL Draft.</p>
+        <div class="clip" data-clip>
+          <div class="clip-text">
+            <p class="body">MoonPay ran the first X Games League Draft at Cosm in Los Angeles on 12 Mar 2026. Four club rosters locked on that stage. I was there for MoonPay.</p>
+            <p class="body">This is not a panel with slides. It is a live draft in a venue built for a crowd. The official recap is on X Games. Stills from the floor are below.</p>
+          </div>
+          <button type="button" class="clip-more" data-clip-toggle>Read more</button>
+        </div>
         <p class="sources">
           <a href="https://www.xgames.com/news/global-action-sports-team-rosters-officially-locked-for-four-x-games-clubs-at-first-ever-moonpay-x-games-league-draft/">X Games recap</a>
         </p>
@@ -363,6 +449,33 @@
     var start = (location.hash || "").replace("#", "");
     var map = { talks: "talk", papers: "paper", projects: "project" };
     if (map[start]) applyFilter(map[start]);
+
+    document.querySelectorAll("[data-git]").forEach(function (el) {
+      var repo = el.getAttribute("data-git");
+      var list = el.querySelector("ol");
+      fetch("https://api.github.com/repos/" + repo + "/commits?per_page=8")
+        .then(function (r) { return r.json(); })
+        .then(function (rows) {
+          if (!rows || !rows.length) { el.hidden = true; return; }
+          list.innerHTML = "";
+          rows.forEach(function (c) {
+            var msg = ((c.commit && c.commit.message) || "").split("\n")[0];
+            var when = c.commit && c.commit.author && c.commit.author.date;
+            var d = when ? new Date(when) : null;
+            var label = d ? d.toLocaleDateString("en-US", { month: "short", day: "numeric" }) : "";
+            var li = document.createElement("li");
+            var time = document.createElement("time");
+            time.textContent = label;
+            var a = document.createElement("a");
+            a.href = c.html_url;
+            a.textContent = msg;
+            li.appendChild(time);
+            li.appendChild(a);
+            list.appendChild(li);
+          });
+        })
+        .catch(function () { el.hidden = true; });
+    });
 
     document.querySelectorAll("[data-clip-toggle]").forEach(function (btn) {
       btn.addEventListener("click", function () {
