@@ -98,14 +98,35 @@
       text-underline-offset: 4px;
       margin-right: 16px;
     }
+    .gallery { margin: 0; }
     img.cover {
       width: 100%;
       height: auto;
       display: block;
     }
+    .thumbs {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+    .thumbs button {
+      border: 1px solid var(--hair);
+      padding: 0;
+      background: none;
+      cursor: pointer;
+      line-height: 0;
+    }
+    .thumbs button.on { border-color: var(--ink); }
+    .thumbs img {
+      height: 64px;
+      width: auto;
+      display: block;
+    }
     @media (max-width: 700px) {
       .wrap { padding: 20px 18px 72px; }
       article { grid-template-columns: 1fr; gap: 10px; padding: 36px 0; }
+      .thumbs img { height: 52px; }
     }
   </style>
 </head>
@@ -138,7 +159,13 @@
           <a href="https://x.com/TrustWallet/status/2090481818797543507">Announce</a>
           <a href="https://x.com/i/broadcasts/1qGvvezeaDBGB">Broadcast</a>
         </p>
-        <a href="https://x.com/TrustWallet/status/2090847233612902845"><img class="cover" src="covers/trust-talks.jpg" alt="Trust Talks S3E1" /></a>
+        <div class="gallery" data-gallery>
+          <img class="cover" src="covers/trust-talks.jpg" alt="Trust Talks S3E1" />
+          <div class="thumbs">
+            <button type="button" class="on" data-src="covers/trust-talks.jpg" data-alt="Trust Talks S3E1 promo"><img src="covers/trust-talks.jpg" alt="" /></button>
+            <button type="button" data-src="covers/trust-talks-2.jpg" data-alt="Trust Talks S3E1 live"><img src="covers/trust-talks-2.jpg" alt="" /></button>
+          </div>
+        </div>
       </div>
     </article>
 
@@ -150,7 +177,13 @@
         <p class="sources">
           <a href="https://www.youtube.com/watch?v=pV-Sem9TRIE">YouTube</a>
         </p>
-        <a href="https://www.youtube.com/watch?v=pV-Sem9TRIE"><img class="cover" src="covers/eth-milan.jpg" alt="ETH Milan panel" /></a>
+        <div class="gallery" data-gallery>
+          <img class="cover" src="covers/eth-milan.jpg" alt="ETH Milan panel" />
+          <div class="thumbs">
+            <button type="button" class="on" data-src="covers/eth-milan.jpg" data-alt="ETH Milan panel"><img src="covers/eth-milan.jpg" alt="" /></button>
+            <button type="button" data-src="covers/eth-milan-2.jpg" data-alt="ETH Milan panel, second still"><img src="covers/eth-milan-2.jpg" alt="" /></button>
+          </div>
+        </div>
       </div>
     </article>
 
@@ -163,7 +196,13 @@
           <a href="https://x.com/moonpay/status/2036539540542828758">MoonPay post</a>
           <a href="https://www.linkedin.com/posts/andreslamothe_yesterday-i-had-the-privilege-of-presenting-activity-7442593812398448640-QC9o">LinkedIn</a>
         </p>
-        <a href="https://x.com/moonpay/status/2036539540542828758"><img class="cover" src="covers/solana.jpg" alt="Solana Accelerate DEPOSITS talk" /></a>
+        <div class="gallery" data-gallery>
+          <img class="cover" src="covers/solana.jpg" alt="Solana Accelerate DEPOSITS talk" />
+          <div class="thumbs">
+            <button type="button" class="on" data-src="covers/solana.jpg" data-alt="Solana Accelerate DEPOSITS phones"><img src="covers/solana.jpg" alt="" /></button>
+            <button type="button" data-src="covers/solana-2.jpg" data-alt="Solana Accelerate DEPOSITS flowchart"><img src="covers/solana-2.jpg" alt="" /></button>
+          </div>
+        </div>
       </div>
     </article>
 
@@ -175,7 +214,13 @@
         <p class="sources">
           <a href="https://www.youtube.com/watch?v=qX5kvVNgMoQ">YouTube</a>
         </p>
-        <a href="https://www.youtube.com/watch?v=qX5kvVNgMoQ"><img class="cover" src="covers/ryder.jpg" alt="Ryder One Stories interview" /></a>
+        <div class="gallery" data-gallery>
+          <img class="cover" src="covers/ryder.jpg" alt="Ryder One Stories interview" />
+          <div class="thumbs">
+            <button type="button" class="on" data-src="covers/ryder.jpg" data-alt="Ryder One Stories interview"><img src="covers/ryder.jpg" alt="" /></button>
+            <button type="button" data-src="covers/ryder-2.jpg" data-alt="Ryder One Stories, second still"><img src="covers/ryder-2.jpg" alt="" /></button>
+          </div>
+        </div>
       </div>
     </article>
 
@@ -187,9 +232,30 @@
         <p class="sources">
           <a href="https://www.xgames.com/news/global-action-sports-team-rosters-officially-locked-for-four-x-games-clubs-at-first-ever-moonpay-x-games-league-draft/">X Games recap</a>
         </p>
-        <a href="https://www.xgames.com/news/global-action-sports-team-rosters-officially-locked-for-four-x-games-clubs-at-first-ever-moonpay-x-games-league-draft/"><img class="cover" src="covers/xgl.jpg" alt="MoonPay X Games League Draft stage" /></a>
+        <div class="gallery" data-gallery>
+          <img class="cover" src="covers/xgl.jpg" alt="MoonPay X Games League Draft stage" />
+          <div class="thumbs">
+            <button type="button" class="on" data-src="covers/xgl.jpg" data-alt="XGL Draft still 1"><img src="covers/xgl.jpg" alt="" /></button>
+            <button type="button" data-src="covers/xgl-2.jpg" data-alt="XGL Draft still 2"><img src="covers/xgl-2.jpg" alt="" /></button>
+            <button type="button" data-src="covers/xgl-3.jpg" data-alt="XGL Draft still 3"><img src="covers/xgl-3.jpg" alt="" /></button>
+            <button type="button" data-src="covers/xgl-4.jpg" data-alt="XGL Draft still 4"><img src="covers/xgl-4.jpg" alt="" /></button>
+          </div>
+        </div>
       </div>
     </article>
   </div>
+  <script>
+    document.querySelectorAll("[data-gallery]").forEach(function (g) {
+      var main = g.querySelector(".cover");
+      g.querySelectorAll(".thumbs button").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          main.src = btn.getAttribute("data-src");
+          main.alt = btn.getAttribute("data-alt") || main.alt;
+          g.querySelectorAll(".thumbs button").forEach(function (b) { b.classList.remove("on"); });
+          btn.classList.add("on");
+        });
+      });
+    });
+  </script>
 </body>
 </html>
