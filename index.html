@@ -62,6 +62,24 @@
       margin-bottom: 8px;
     }
     .filters .on { color: var(--ink); text-decoration: underline; text-underline-offset: 6px; }
+    .filters button {
+      background: none;
+      border: 0;
+      font: inherit;
+      letter-spacing: inherit;
+      text-transform: inherit;
+      color: inherit;
+      cursor: pointer;
+      padding: 0;
+    }
+    article[hidden] { display: none; }
+    .empty {
+      font-size: 14px;
+      color: var(--mute);
+      padding: 48px 0;
+      display: none;
+    }
+    .empty.show { display: block; }
     article {
       display: grid;
       grid-template-columns: 120px 1fr;
@@ -141,15 +159,29 @@
     </header>
 
     <h1>A public log of work.</h1>
-    <p class="stats">5 talks · 0 papers · 0 projects</p>
-    <div class="filters">
-      <span class="on">All</span>
-      <span>Talks</span>
-      <span>Papers</span>
-      <span>Projects</span>
+    <p class="stats">5 talks · 0 papers · 1 project</p>
+    <div class="filters" data-filters>
+      <button type="button" class="on" data-filter="all">All</button>
+      <button type="button" data-filter="talk">Talks</button>
+      <button type="button" data-filter="paper">Papers</button>
+      <button type="button" data-filter="project">Projects</button>
     </div>
+    <p class="empty" data-empty>Nothing in this view yet.</p>
 
-    <article>
+
+    <article data-kind="project">
+      <div class="meta"><span>Aug 29 2026</span><span>Project</span></div>
+      <div>
+        <h2><a href="https://coastal-grade.pages.dev">Coastal Grade</a></h2>
+        <p class="dek">Phone-first web app. Puerto Vallarta.</p>
+        <p class="sources">
+          <a href="https://coastal-grade.pages.dev">Live</a>
+          <a href="https://github.com/humaragent-source/coastal-grade">GitHub</a>
+        </p>
+      </div>
+    </article>
+
+    <article data-kind="talk">
       <div class="meta"><span>Aug 21 2026</span><span>Talk</span></div>
       <div>
         <h2><a href="https://x.com/TrustWallet/status/2090847233612902845">Trust Talks S3E1 — Cash App Pay, onramps &amp; self-custody</a></h2>
@@ -169,7 +201,7 @@
       </div>
     </article>
 
-    <article>
+    <article data-kind="talk">
       <div class="meta"><span>May 2026</span><span>Talk</span></div>
       <div>
         <h2><a href="https://www.youtube.com/watch?v=pV-Sem9TRIE">The Invisible Rails of Crypto Adoption</a></h2>
@@ -187,7 +219,7 @@
       </div>
     </article>
 
-    <article>
+    <article data-kind="talk">
       <div class="meta"><span>Mar 24 2026</span><span>Talk</span></div>
       <div>
         <h2><a href="https://x.com/moonpay/status/2036539540542828758">Crypto Neo Banks / Headless Apple Pay</a></h2>
@@ -206,7 +238,7 @@
       </div>
     </article>
 
-    <article>
+    <article data-kind="talk">
       <div class="meta"><span>Mar 19 2026</span><span>Talk</span></div>
       <div>
         <h2><a href="https://www.youtube.com/watch?v=qX5kvVNgMoQ">Could Crypto Wallets Replace Your Bank Account?</a></h2>
@@ -224,7 +256,7 @@
       </div>
     </article>
 
-    <article>
+    <article data-kind="talk">
       <div class="meta"><span>Mar 12 2026</span><span>Talk</span></div>
       <div>
         <h2><a href="https://www.xgames.com/news/global-action-sports-team-rosters-officially-locked-for-four-x-games-clubs-at-first-ever-moonpay-x-games-league-draft/">MoonPay X Games League Draft</a></h2>
@@ -256,6 +288,27 @@
         });
       });
     });
+
+    document.querySelectorAll("[data-filters] button").forEach(function (btn) {
+      btn.addEventListener("click", function () { applyFilter(btn.getAttribute("data-filter")); });
+    });
+    function applyFilter(kind) {
+      document.querySelectorAll("[data-filters] button").forEach(function (b) {
+        b.classList.toggle("on", b.getAttribute("data-filter") === kind);
+      });
+      var shown = 0;
+      document.querySelectorAll("article[data-kind]").forEach(function (a) {
+        var ok = kind === "all" || a.getAttribute("data-kind") === kind;
+        a.hidden = !ok;
+        if (ok) shown += 1;
+      });
+      document.querySelector("[data-empty]").classList.toggle("show", shown === 0);
+      var hash = { talk: "talks", paper: "papers", project: "projects" }[kind];
+      if (history.replaceState) history.replaceState(null, "", hash ? "#" + hash : location.pathname + location.search);
+    }
+    var start = (location.hash || "").replace("#", "");
+    var map = { talks: "talk", papers: "paper", projects: "project" };
+    if (map[start]) applyFilter(map[start]);
   </script>
 </body>
 </html>
