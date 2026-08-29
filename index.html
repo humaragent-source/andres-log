@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Andres Lamothe — A public log of work</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --paper: #f9f9f7;
+      --ink: #0a0a0a;
+      --mute: #6b665e;
+      --hair: #e6e1d8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { background: var(--paper); color: var(--ink); }
+    body {
+      font-family: Inter, system-ui, sans-serif;
+      font-size: 16px;
+      line-height: 1.5;
+    }
+    a { color: inherit; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .wrap { max-width: 920px; margin: 0 auto; padding: 28px 32px 96px; }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      font-size: 12px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+    header nav a { margin-left: 18px; color: var(--mute); }
+    header nav a.on { color: var(--ink); }
+    h1 {
+      font-family: "Instrument Serif", serif;
+      font-weight: 400;
+      font-size: clamp(42px, 7vw, 72px);
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+      margin: 64px 0 16px;
+    }
+    .stats {
+      font-size: 12px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--mute);
+      margin-bottom: 36px;
+    }
+    .filters {
+      display: flex;
+      gap: 18px;
+      font-size: 12px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--mute);
+      border-top: 1px solid var(--hair);
+      border-bottom: 1px solid var(--hair);
+      padding: 14px 0;
+      margin-bottom: 8px;
+    }
+    .filters .on { color: var(--ink); text-decoration: underline; text-underline-offset: 6px; }
+    article {
+      display: grid;
+      grid-template-columns: 120px 1fr;
+      gap: 28px;
+      padding: 48px 0;
+      border-bottom: 1px solid var(--hair);
+    }
+    .meta {
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--mute);
+      padding-top: 10px;
+    }
+    .meta span { display: block; }
+    h2 {
+      font-family: "Instrument Serif", serif;
+      font-weight: 400;
+      font-size: clamp(26px, 3.4vw, 34px);
+      line-height: 1.15;
+      margin-bottom: 8px;
+    }
+    .dek { color: var(--mute); font-size: 14px; margin-bottom: 18px; }
+    img.cover {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+    @media (max-width: 700px) {
+      .wrap { padding: 20px 18px 72px; }
+      article { grid-template-columns: 1fr; gap: 10px; padding: 36px 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div>Andres Lamothe</div>
+      <nav>
+        <a class="on" href="./">Log</a>
+        <a href="./about.html">About</a>
+      </nav>
+    </header>
+
+    <h1>A public log of work.</h1>
+    <p class="stats">5 talks · 0 papers · 0 projects</p>
+    <div class="filters">
+      <span class="on">All</span>
+      <span>Talks</span>
+      <span>Papers</span>
+      <span>Projects</span>
+    </div>
+
+    <article>
+      <div class="meta"><span>Aug 21 2026</span><span>Talk</span></div>
+      <div>
+        <h2><a href="https://x.com/TrustWallet/status/2090847233612902845">Trust Talks S3E1 — Cash App Pay, onramps &amp; self-custody</a></h2>
+        <p class="dek">Trust Wallet × MoonPay. Live with Tati. Hosted by Jake.</p>
+        <a href="https://x.com/TrustWallet/status/2090847233612902845"><img class="cover" src="covers/trust-talks.jpg" alt="Trust Talks S3E1 live still" /></a>
+      </div>
+    </article>
+
+    <article>
+      <div class="meta"><span>May 2026</span><span>Talk</span></div>
+      <div>
+        <h2><a href="https://www.youtube.com/watch?v=pV-Sem9TRIE">The Invisible Rails of Crypto Adoption</a></h2>
+        <p class="dek">ETH Milan panel. MoonPay + Trust Wallet.</p>
+        <a href="https://www.youtube.com/watch?v=pV-Sem9TRIE"><img class="cover" src="covers/eth-milan.jpg" alt="ETH Milan panel" /></a>
+      </div>
+    </article>
+
+    <article>
+      <div class="meta"><span>Mar 24 2026</span><span>Talk</span></div>
+      <div>
+        <h2><a href="https://www.linkedin.com/posts/andreslamothe_yesterday-i-had-the-privilege-of-presenting-activity-7442593812398448640-QC9o">Crypto Neo Banks / Headless Apple Pay</a></h2>
+        <p class="dek">Solana Accelerate Fintech Series. NYC.</p>
+        <a href="https://x.com/moonpay/status/2036539540542828758"><img class="cover" src="covers/solana.jpg" alt="Solana Accelerate DEPOSITS talk" /></a>
+      </div>
+    </article>
+
+    <article>
+      <div class="meta"><span>Mar 19 2026</span><span>Talk</span></div>
+      <div>
+        <h2><a href="https://www.youtube.com/watch?v=qX5kvVNgMoQ">Could Crypto Wallets Replace Your Bank Account?</a></h2>
+        <p class="dek">Ryder One Stories. Interview + unboxing.</p>
+        <a href="https://www.youtube.com/watch?v=qX5kvVNgMoQ"><img class="cover" src="covers/ryder.jpg" alt="Ryder One Stories interview" /></a>
+      </div>
+    </article>
+
+    <article>
+      <div class="meta"><span>Mar 12 2026</span><span>Talk</span></div>
+      <div>
+        <h2><a href="https://www.xgames.com/news/global-action-sports-team-rosters-officially-locked-for-four-x-games-clubs-at-first-ever-moonpay-x-games-league-draft/">MoonPay X Games League Draft</a></h2>
+        <p class="dek">Cosm LA. Inaugural XGL Draft.</p>
+        <a href="https://www.xgames.com/news/global-action-sports-team-rosters-officially-locked-for-four-x-games-clubs-at-first-ever-moonpay-x-games-league-draft/"><img class="cover" src="covers/xgl.jpg" alt="MoonPay X Games League Draft stage" /></a>
+      </div>
+    </article>
+  </div>
+</body>
+</html>
