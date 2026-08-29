@@ -111,7 +111,39 @@
       max-width: 42em;
       margin: 0 0 12px;
     }
-    .body + .sources { margin-top: 18px; }
+    .clip {
+      position: relative;
+      max-width: 42em;
+      margin: 0 0 8px;
+    }
+    .clip-text {
+      max-height: 4.8em;
+      overflow: hidden;
+    }
+    .clip.open .clip-text { max-height: none; }
+    .clip:not(.open)::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 28px;
+      height: 2.6em;
+      background: linear-gradient(to bottom, rgba(249,249,247,0), var(--paper));
+      pointer-events: none;
+    }
+    .clip-more {
+      background: none;
+      border: 0;
+      font: inherit;
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--ink);
+      text-decoration: underline;
+      text-underline-offset: 4px;
+      cursor: pointer;
+      padding: 4px 0 0;
+    }
     .sources {
       font-size: 11px;
       letter-spacing: 0.14em;
@@ -182,8 +214,13 @@
       <div>
         <h2><a href="https://coastal-grade.pages.dev">Coastal Grade</a></h2>
         <p class="dek">A region-first grade of beach towns that share a workday with California.</p>
-        <p class="body">I think we are heading into abundance. When more people have more, they will not bid on things you can print. They will bid on coastal properties or land. The version of that I care about is beachfront Mexico on the same clock as California: one flight, same workday, a life that is several times the house you could buy in the Bay. Puerto Vallarta, Punta Mita, and Sayulita already proved the demand. The hard part is the towns around them. Which ones have the same bones, the same kind of runway, and a price that still has room.</p>
-        <p class="body">I built Coastal Grade because starting listing by listing is how you get lost. You need a high-level read of the whole region first. Asking price. Drive time from the international airport. Safety, drinkable water, internet, highways, what is being built, clean beaches, storm risk that is not deadly. Then you can compare those towns to the ones you already like, project growth from what is already public, and only then go look at a specific property. I made it to decide for myself. If it works here, it can work for someone else in this region, or in another one.</p>
+        <div class="clip" data-clip>
+          <div class="clip-text">
+            <p class="body">I think we are heading into abundance. When more people have more, they will not bid on things you can print. They will bid on coastal properties or land. The version of that I care about is beachfront Mexico on the same clock as California: one flight, same workday, a life that is several times the house you could buy in the Bay. Puerto Vallarta, Punta Mita, and Sayulita already proved the demand. The hard part is the towns around them. Which ones have the same bones, the same kind of runway, and a price that still has room.</p>
+            <p class="body">I built Coastal Grade because starting listing by listing is how you get lost. You need a high-level read of the whole region first. Asking price. Drive time from the international airport. Safety, drinkable water, internet, highways, what is being built, clean beaches, storm risk that is not deadly. Then you can compare those towns to the ones you already like, project growth from what is already public, and only then go look at a specific property. I made it to decide for myself. If it works here, it can work for someone else in this region, or in another one.</p>
+          </div>
+          <button type="button" class="clip-more" data-clip-toggle>Read more</button>
+        </div>
         <p class="sources">
           <a href="https://coastal-grade.pages.dev">Live</a>
           <a href="https://github.com/humaragent-source/coastal-grade">GitHub</a>
@@ -326,6 +363,14 @@
     var start = (location.hash || "").replace("#", "");
     var map = { talks: "talk", papers: "paper", projects: "project" };
     if (map[start]) applyFilter(map[start]);
+
+    document.querySelectorAll("[data-clip-toggle]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var wrap = btn.closest("[data-clip]");
+        var open = wrap.classList.toggle("open");
+        btn.textContent = open ? "Show less" : "Read more";
+      });
+    });
   </script>
 </body>
 </html>
