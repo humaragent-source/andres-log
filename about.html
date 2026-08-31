@@ -13,7 +13,9 @@
     body { background:var(--paper); color:var(--ink); font-family:Inter,system-ui,sans-serif; }
     .wrap { max-width:720px; margin:0 auto; padding:28px 32px 96px; }
     header { display:flex; justify-content:space-between; font-size:12px; letter-spacing:.12em; text-transform:uppercase; }
-    header a { color:var(--mute); text-decoration:none; margin-left:18px; }
+    header a { color:var(--mute); text-decoration:none; }
+    header nav a { margin-left:18px; }
+    header > a { color:inherit; }
     h1 { font-family:"Instrument Serif",serif; font-weight:400; font-size:48px; margin:64px 0 20px; }
     p { color:var(--mute); max-width:38em; line-height:1.6; }
   </style>
@@ -21,7 +23,7 @@
 <body>
   <div class="wrap">
     <header>
-      <div>Andres Lamothe</div>
+      <a href="./">Andres Lamothe</a>
       <nav><a href="./">Log</a><a href="./about.html">About</a></nav>
     </header>
     <h1>About</h1>
