@@ -32,6 +32,7 @@
       letter-spacing: 0.12em;
       text-transform: uppercase;
     }
+    header .brand { color: inherit; }
     header nav a { margin-left: 18px; color: var(--mute); }
     header nav a.on { color: var(--ink); }
     h1 {
@@ -236,9 +237,9 @@
 <body>
   <div class="wrap">
     <header>
-      <div>Andres Lamothe</div>
+      <a class="brand" href="./" data-home>Andres Lamothe</a>
       <nav>
-        <a class="on" href="./">Log</a>
+        <a class="on" href="./" data-home>Log</a>
         <a href="./about.html">About</a>
       </nav>
     </header>
@@ -437,6 +438,13 @@
     document.querySelectorAll("[data-filters] button").forEach(function (btn) {
       btn.addEventListener("click", function () { applyFilter(btn.getAttribute("data-filter")); });
     });
+    document.querySelectorAll("[data-home]").forEach(function (a) {
+      a.addEventListener("click", function (e) {
+        e.preventDefault();
+        applyFilter("all");
+        window.scrollTo(0, 0);
+      });
+    });
     function applyFilter(kind) {
       document.querySelectorAll("[data-filters] button").forEach(function (b) {
         b.classList.toggle("on", b.getAttribute("data-filter") === kind);
@@ -451,9 +459,7 @@
       var hash = { talk: "talks", paper: "papers", project: "projects" }[kind];
       if (history.replaceState) history.replaceState(null, "", hash ? "#" + hash : location.pathname + location.search);
     }
-    var start = (location.hash || "").replace("#", "");
-    var map = { talks: "talk", papers: "paper", projects: "project" };
-    if (map[start]) applyFilter(map[start]);
+    applyFilter("all");
 
     document.querySelectorAll("[data-git]").forEach(function (el) {
       var repo = el.getAttribute("data-git");
