@@ -8,26 +8,42 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500&display=swap" rel="stylesheet" />
   <style>
-    :root { --paper:#f9f9f7; --ink:#0a0a0a; --mute:#6b665e; }
+    :root { --paper:#f9f9f7; --ink:#0a0a0a; --mute:#6b665e; --hair:#e6e1d8; }
     * { box-sizing: border-box; margin:0; padding:0; }
     body { background:var(--paper); color:var(--ink); font-family:Inter,system-ui,sans-serif; }
+    a { color: inherit; text-decoration: none; }
+    a:hover { text-decoration: underline; }
     .wrap { max-width:720px; margin:0 auto; padding:28px 32px 96px; }
-    header { display:flex; justify-content:space-between; font-size:12px; letter-spacing:.12em; text-transform:uppercase; }
-    header a { color:var(--mute); text-decoration:none; }
+    header { display:flex; justify-content:space-between; align-items:baseline; font-size:12px; letter-spacing:.12em; text-transform:uppercase; }
+    header a { color:var(--mute); }
     header nav a { margin-left:18px; }
     header > a { color:inherit; }
-    h1 { font-family:"Instrument Serif",serif; font-weight:400; font-size:48px; margin:64px 0 20px; }
-    p { color:var(--mute); max-width:38em; line-height:1.6; }
+    header nav a.on { color:var(--ink); }
+    h1 { font-family:"Instrument Serif",serif; font-weight:400; font-size:clamp(42px, 7vw, 72px); line-height:1.05; letter-spacing:-0.02em; margin:64px 0 28px; }
+    .copy p { color:var(--mute); max-width:38em; line-height:1.65; font-size:16px; margin:0 0 1.15em; }
+    .copy p:last-child { margin-bottom:0; }
+    @media (max-width: 700px) {
+      .wrap { padding:20px 18px 72px; }
+    }
   </style>
 </head>
 <body>
   <div class="wrap">
     <header>
       <a href="./">Andres Lamothe</a>
-      <nav><a href="./">Log</a><a href="./about.html">About</a></nav>
+      <nav>
+        <a href="./">Log</a>
+        <a class="on" href="./about.html">About</a>
+      </nav>
     </header>
     <h1>About</h1>
-    <p>Executive Director of Partnerships at MoonPay. This site is a public log of talks, papers, and projects. A short side story will live here.</p>
+    <div class="copy">
+      <p>I am Executive Director of Partnerships at MoonPay. I lead go-to-market for MoonPay Deposit and MoonPay Commerce. That is the role.</p>
+      <p>Under it is the actual work. Product. Design. How a thing feels when you press it. The flow, the transition, the motion, every small detail between the tap and the result.</p>
+      <p>I have used Product Hunt every day for ten years, mostly for the new ideas, the exciting projects. Plenty of those were exciting as products. What I actually obsessed over was the design, and the vision behind the branding, and whether that vision lined up with the real product. A great product on its own was never the point. The combination was.</p>
+      <p>Daniel Ek kept coming back to this at Spotify: the brain perceives anything below 250 milliseconds as instant. You hit play. The song was not on the phone. Pirate Bay and iTunes were already on the hard drive, so they did not have to load. Until Spotify could play a song that fast without it being downloaded, it would never beat a file that was already there. That is the obsession I mean. Pixel-perfect is not taste. It is whether the thing happens, or whether you notice it happening.</p>
+      <p>I keep those feelings around and mix them. A little alchemy. This site is the public log of talks, papers, and projects.</p>
+    </div>
   </div>
 </body>
 </html>
