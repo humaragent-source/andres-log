@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Duress-Aware Wallet Security Standard — Full proposal</title>
+<style>
+  :root {
+    --bg: #F7F6F3; --paper: #FFFFFF; --ink: #37352F; --mute: #6B6A65; --line: #E9E8E4;
+    --blue: #E7F0FD; --blue-ink: #1F4E9B; --blue-edge: #C5D9F7;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+    font: 400 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased; padding-bottom: env(safe-area-inset-bottom, 0px); }
+  .wrap { max-width: 820px; margin: 0 auto; padding: 48px 28px 96px; }
+  .paper { background: var(--paper); border-radius: 12px; padding: 56px 52px;
+    box-shadow: 0 1px 2px rgba(0,0,0,.04); border: 1px solid var(--line); }
+  .nav { font-size: 13px; margin-bottom: 20px; }
+  .nav a { color: var(--blue-ink); text-decoration: none; font-weight: 600; }
+  .nav a:hover { text-decoration: underline; }
+  h1 { font-size: 32px; line-height: 1.2; letter-spacing: -.02em; margin: 0 0 16px; }
+  h2 { font-size: 22px; margin: 28px 0 12px; }
+  h3 { font-size: 16px; margin: 22px 0 8px; }
+  p { margin: 0 0 14px; }
+  ul, ol { margin: 0 0 14px; padding-left: 22px; }
+  li { margin-bottom: 6px; }
+  blockquote { margin: 16px 0; padding: 12px 14px; background: var(--blue);
+    border: 1px solid var(--blue-edge); border-radius: 8px; color: var(--blue-ink); }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px;
+    background: #FAFAF8; padding: 1px 5px; border-radius: 4px; border: 1px solid var(--line); }
+  hr.div { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+  .footer-note { font-size: 13px; color: var(--mute); margin-top: 32px; }
+  img { max-width: 100%; height: auto; }
+  @media (max-width: 640px) {
+    .wrap { padding: 16px 10px calc(48px + env(safe-area-inset-bottom, 0px)); }
+    .paper { padding: 24px 16px; }
+    h1 { font-size: 24px; }
+    h2 { font-size: 19px; }
+  }
+  @media (max-width: 480px) {
+    .wrap { padding: 12px 8px calc(40px + env(safe-area-inset-bottom, 0px)); }
+    .paper { padding: 20px 14px; }
+    h1 { font-size: 22px; }
+    h2 { font-size: 18px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap"><div class="paper">
+<p class="nav"><a href="index.html">← Proposal home</a></p>
+<h1>Duress-Aware Wallet Security Standard: A Feature Proposal</h1>
+<blockquote><strong>Phone-friendly readers:</strong> open <code>duress-aware-wallet-notion-part1.html</code> / <code>part2.html</code> (or <code>duress-aware-threat-model-matrix.html</code> for the matrix alone). This Markdown source is unchanged.</blockquote>
+<p>
+<strong>Audience:</strong> Wallet engineers, neobank / card-partner teams, security reviewers  
+<br/>
+<strong>Status:</strong> Feature-layer proposal (not a rigid protocol)  
+<br/>
+<strong>Examples limited to:</strong> EtherFi, RedotPay, Cast, Tornado Cash  
+</p>
+<hr class="div"/>
+<h2>1. Executive summary</h2>
+<p>
+Self-custodial crypto wallets give users control of keys but almost none of the operational controls people expect from banks: withdrawal limits, cool-downs, trusted-approver workflows, or a credible response to physical coercion. Face ID and device biometrics unlock the real vault for anyone who can force the phone into the owner’s face. Once funds leave via a mixer (historically exemplified by <strong>Tornado Cash</strong>), recovery is effectively gone.
+</p>
+<p>
+This proposal defines a <strong>duress-aware feature layer</strong>—not one mandatory UI or one shared secret scheme—that wallets and neobanks can adopt in pieces. The core idea: the same account identity can open either a <strong>real vault</strong> or a <strong>decoy vault</strong>, selected by which password is entered after (or instead of) biometric unlock. Outside a home geofence, high-value transfers get time-locks and/or multi-sig approval from a trusted contact. The wallet UI can be masked as a mundane app so the real product is not obvious under shoulder-surfing.
+</p>
+<p>
+Ship this as an <strong>adoptable vocabulary and policy kit</strong>. Uniform, identical behavior across every wallet is predictable and therefore attackable; a minimal shared language lets partners integrate without freezing design into one brittle standard.
+</p>
+<hr class="div"/>
+<h2>2. Problem statement</h2>
+<h3>2.1 What banks have that wallets lack</h3>
+<p>
+Retail banking and card rails routinely expose:
+</p>
+<ul>
+<li>Per-day / per-transfer limits  </li>
+<li>Delayed settlement or hold periods for unusual amounts  </li>
+<li>Freeze / dispute paths and some fund-tracing on regulated rails  </li>
+</ul>
+<p>
+Self-custodial wallets typically expose:
+</p>
+<ul>
+<li>Immediate, final settlement once the signature is broadcast  </li>
+<li>No issuer-side “undo”  </li>
+<li>Biometric unlock that maps 1:1 to full spending authority  </li>
+</ul>
+<p>
+Products such as <strong>EtherFi</strong> (self-custody / DeFi-adjacent UX) and card/neobank bridges such as <strong>RedotPay</strong> sit closer to everyday spend—and therefore closer to coercion scenarios—than cold storage. Any duress story must work across both “hot wallet” and “spend rail” surfaces.
+</p>
+<h3>2.2 The coercion stack</h3>
+<p>
+A realistic attack combines:
+</p>
+<ol>
+<li>1. <strong>Physical coercion</strong> (threat of violence).  </li>
+<li>2. <strong>Face / biometric unlock</strong> that opens the real balance.  </li>
+<li>3. <strong>Immediate transfer</strong>, optionally through a mixer or privacy pool (historically associated with <strong>Tornado Cash</strong>-style obfuscation), after which tracing and recovery collapse.</li>
+</ol>
+<p>
+There is no bank chargeback on L1. Without a deliberate duress mode, the victim’s only options are compliance or total loss.
+</p>
+<h3>2.3 Why “just hide the app” is not enough</h3>
+<p>
+Renaming the icon or using a fake splash is insufficient if the full interaction path (notifications, Face ID sheet, balance screen, send flow) still looks like a wallet. Masking must survive the <strong>full interaction</strong>, not only the home-screen glyph. Design systems (including mobile UX workstreams such as <strong>Cast</strong>-style visual polish for consumer apps) should treat disguise as an end-to-end state machine, not a skin.
+</p>
+<hr class="div"/>
+<h2>3. Core concept: duress password → decoy vault</h2>
+<p>
+| Element | Behavior |
+<br/>
+|--------|----------|
+<br/>
+| Identity | Same username / account handle |
+<br/>
+| Primary password | Opens the <strong>real vault</strong> |
+<br/>
+| Duress password | Opens a <strong>decoy vault</strong> holding a substantial but non-devastating sum (illustrative: <strong>~$3,000</strong>) |
+<br/>
+| Session | Logout + primary password restores the real vault |
+<br/>
+| Attacker view | Plausible balances, history, and spend UX inside the decoy |
+</p>
+<h3>3.1 Design goals for the decoy</h3>
+<ul>
+<li>Believable under short inspection (recent activity, a few contacts, normal UI chrome).  </li>
+<li>Painful enough to “pay” under duress without being life-destroying.  </li>
+<li>Isolated cryptographically: signing keys for the decoy must not unlock real vault keys.  </li>
+<li>No accidental leakage of real balances via notifications, widgets, or clipboard.</li>
+</ul>
+<h3>3.2 Calibration note</h3>
+<p>
+~$3,000 is an <strong>example</strong>, not a fixed product constant. Calibration must consider perceived wealth, local cost of living, and typical wallet balances. See Open risks.
+</p>
+<hr class="div"/>
+<h2>4. Biometric gating</h2>
+<p>
+<strong>Claim:</strong> Face ID (or equivalent) alone is insufficient outside a trusted context.
+</p>
+<p>
+Proposed rule:
+</p>
+<ul>
+<li><strong>Inside home geofence:</strong> biometric may unlock the last-used vault <em>or</em> present a password chooser, depending on product risk appetite.  </li>
+<li><strong>Outside home geofence:</strong> biometric is only a device gate; a <strong>password</strong> is required, and that password selects <strong>which vault</strong> opens (real vs duress).</li>
+</ul>
+<p>
+Rationale: coercion often happens away from home (street, vehicle, hotel). Forcing a second factor that encodes vault choice raises the cost of a successful “face only” attack without requiring the victim to invent a new account on the spot.
+</p>
+<hr class="div"/>
+<h2>5. Geofence policy</h2>
+<p>
+Outside a configured radius (home / trusted places):
+</p>
+<ol>
+<li>1. <strong>Secondary password required</strong> (vault selection).  </li>
+<li>2. <strong>Transfers above a threshold</strong> (illustrative: <strong>$1,000</strong>) trigger:  </li>
+</ol>
+<p>
+   - a <strong>24-hour time-lock</strong>, and/or  
+<br/>
+   - <strong>multi-sig approval</strong> from a pre-enrolled trusted contact.
+</p>
+<p>
+Inside the geofence, products may relax time-locks for ordinary spend (e.g. card rails like <strong>RedotPay</strong>) while still offering optional duress passwords.
+</p>
+<p>
+Implementations should treat geofence as a <strong>policy object</strong>, not a hard-coded map, so partners can define multiple trusted zones.
+</p>
+<hr class="div"/>
+<h2>6. App masking</h2>
+<ul>
+<li>Present the wallet as a mundane app (e.g. gym tracker, notes, weather) until an unlock code / gesture reveals the real UI.  </li>
+<li>Masking must cover: icon, name, notification copy, Face ID prompt text, and deep links.  </li>
+<li>Failure mode to avoid: disguise that collapses on first biometric sheet or first push notification.</li>
+</ul>
+<p>
+This is a <strong>UX/feature</strong> concern as much as a crypto concern; visual systems (e.g. <strong>Cast</strong>-quality consumer UI) should own the disguise state as a first-class mode.
+</p>
+<hr class="div"/>
+<h2>7. Positioning: feature layer, not one rigid standard</h2>
+<p>
+Uniformity is predictable. If every wallet uses the same decoy amount, same delay, and same prompt copy, attackers learn the script.
+</p>
+<p>
+<strong>Propose instead:</strong>
+</p>
+<ul>
+<li>An <strong>adoptable feature layer</strong> wallets and neobanks can implement partially.  </li>
+<li>A <strong>minimal common vocabulary</strong> so EtherFi-class wallets, RedotPay-class spend rails, and design partners can integrate without one frozen UI:</li>
+</ul>
+<p>
+| Term | Meaning |
+<br/>
+|------|---------|
+<br/>
+| <strong>Duress password</strong> | Credential that opens the decoy vault for the same identity |
+<br/>
+| <strong>Geofence policy</strong> | Trusted locations + rules when outside them |
+<br/>
+| <strong>Transfer threshold</strong> | Amount above which cool-down / multi-sig applies |
+<br/>
+| <strong>Multi-sig hook</strong> | Interface to request approval from a trusted contact / co-signer |
+</p>
+<p>
+Optional profiles (aggressive / balanced / light) can share vocabulary while differing in defaults.
+</p>
+<hr class="div"/>
+<h2>8. Open risks</h2>
+<p>
+| Risk | Notes |
+<br/>
+|------|------|
+<br/>
+| <strong>GPS spoofing</strong> | Attacker fakes “at home” to skip outside-fence rules; mitigate with OS location integrity, Wi-Fi/BLE corroboration, or fail-closed outside. |
+<br/>
+| <strong>Coercion at home</strong> | Geofence does not help; rely on duress password + believable decoy. |
+<br/>
+| <strong>Decoy-amount calibration</strong> | Too small → attacker demands the “real” password; too large → real loss under duress. |
+<br/>
+| <strong>Recovery after duress use</strong> | Need safe re-key / rotate after a decoy session without tipping an observer still present. |
+<br/>
+| <strong>“Show me the real password”</strong> | After a decoy transfer, attacker may escalate; training and plausible deniability matter; no crypto silver bullet. |
+<br/>
+| <strong>AML / KYC perception</strong> | Duress and masking can look like evasion tooling; partners need clear lawful-use framing (personal safety), distinct from mixer semantics historically associated with <strong>Tornado Cash</strong>. |
+<br/>
+| <strong>Multi-sig key custody</strong> | Trusted-contact keys create new custody and social-engineering surfaces. |
+<br/>
+| <strong>Notification / metadata leaks</strong> | Widgets, email, and chain analytics can betray the real vault. |
+</p>
+<hr class="div"/>
+<hr class="div"/>
+<h2>9. Decoy Balance Calibration</h2>
+<p>
+Suggested decoy ranges are <strong>illustrative defaults</strong>, not compliance guidance. Inputs for tiering: on-chain history, public persona, social media visibility, and account age. Prefer under-matching a sophisticated attacker over over-funding a decoy.
+</p>
+<p>
+| Perceived-wealth tier | Signals (examples) | Suggested decoy range (USD) | Rationale | When <strong>not</strong> to use this decoy |
+<br/>
+|----------------------|--------------------|-----------------------------|-----------|--------------------------------|
+<br/>
+| <strong>Quiet / new user</strong> | Thin on-chain history; new account; little or no public crypto persona | <strong>$500 – $2,000</strong> | Enough to look like a real hot wallet; loss is survivable | Attacker already saw a larger exchange KYC balance, payroll screenshot, or NFT floor that contradicts a tiny vault |
+<br/>
+| <strong>Moderate visible activity</strong> | Months–years of ordinary txs; occasional social mentions; mid-size DeFi / card spend (EtherFi- / RedotPay-class patterns) | <strong>$2,000 – $8,000</strong> (default ~<strong>$3,000</strong>) | Matches “serious but not whale” expectation under short inspection | Attacker quotes an exact portfolio (tax form, shared screen, prior shoulder-surf); decoy would be obviously wrong |
+<br/>
+| <strong>High-profile / large history</strong> | Public figure, known large bags, long / high-volume on-chain trail | <strong>$15,000 – $50,000</strong> (cap as % of real hot funds, e.g. ≤5–10%) | Low decoy fails immediately against known wealth; still not treasury | Attacker is informed (ex-partner, coworker, prior hack) and can verify exact holdings on-chain or via leaked exports — decoy mode may be worse than refusal / empty cold story |
+</p>
+<h3>Dynamic vs static decoy funding</h3>
+<ul>
+<li><strong>Default: static (or rarely reviewed) decoy.</strong> Auto-chasing recent activity creates timing tells (sudden top-ups before travel) and can over-fund under a short coercion window.</li>
+<li><strong>Optional slow drift:</strong> allow scheduled, capped rebalancing (e.g. monthly, ±10–20% band) tied to tier policy—not to every inbound payment.</li>
+<li><strong>Never auto-mirror</strong> real vault balance or last N days of deposits dollar-for-dollar; that collapses plausible deniability if the attacker already sampled chain activity.</li>
+</ul>
+<hr class="div"/>
+<h2>10. Multi-sig approver models (safety vs ease)</h2>
+<p>
+Scale: <strong>Safety 1–5</strong> (higher = harder for a coerced user alone to move large funds) · <strong>Ease 1–5</strong> (higher = less friction in daily life). Ratings are relative brainstorm scores, not audits.
+</p>
+<p>
+| Model | How it works | Safety | Ease | Failure modes |
+<br/>
+|-------|--------------|:------:|:----:|---------------|
+<br/>
+| <strong>(a) Trusted person, geographically separated</strong> | Pre-enrolled human co-signer; policy requires min distance from user (e.g. different city) before their approval counts for out-of-fence large transfers | <strong>5</strong> | <strong>2</strong> | Approver unavailable / asleep; same-city travel breaks distance rule; social coercion of the approver; relationship change |
+<br/>
+| <strong>(b) Third-party service / custodian</strong> | Policy engine or regulated co-signer API holds a policy key; auto or human-reviewed approve under SLA | <strong>4</strong> | <strong>4</strong> | Vendor outage; account takeover of the service; AML friction; trust concentration; cost |
+<br/>
+| <strong>(c) Hybrid — person primary, service fallback</strong> | Ping trusted person first; if no response within N hours, escalate to service under the same threshold rules | <strong>5</strong> | <strong>3</strong> | Double-dependency outages; user confusion which path fired; fallback may be slower under active duress |
+<br/>
+| <strong>(d) Rotating approvers from a list</strong> | Round-robin or random pick from a pre-approved set (family + friend + counsel) so one compromised contact is not enough | <strong>4</strong> | <strong>2</strong> | Coordination load; stale contacts; one weak link still approves; notification fatigue |
+<br/>
+| <strong>(e) Time-delayed self-approval</strong> | No second party: above-threshold sends enter a long lock (e.g. 24–72h); user can cancel; after delay, self-finalize | <strong>3</strong> | <strong>5</strong> | Coercion lasting longer than the lock; attacker waits it out; no external check against “real password” escalation |
+</p>
+<p>
+<strong>Ranked shortlist (brainstorm):</strong>  
+</p>
+<ol>
+<li>1. <strong>(c) Hybrid</strong> — best safety/availability trade for partners.  </li>
+<li>2. <strong>(a) Separated person</strong> — highest pure safety if relationships are healthy.  </li>
+<li>3. <strong>(b) Service</strong> — easiest ops at scale.  </li>
+<li>4. <strong>(d) Rotating list</strong> — strong for high-profile users, heavy UX.  </li>
+<li>5. <strong>(e) Delayed self</strong> — easiest onboarding; weakest against patient attackers.</li>
+</ol>
+<p>
+```
+<br/>
+Safety █████  (a) person + distance
+<br/>
+        ████░  (c) hybrid
+<br/>
+        ████░  (b) service / (d) rotating
+<br/>
+        ███░░  (e) delayed self
+</p>
+<p>
+Ease    █████  (e) delayed self
+<br/>
+        ████░  (b) service
+<br/>
+        ███░░  (c) hybrid
+<br/>
+        ██░░░  (a)/(d) human-heavy
+<br/>
+```
+</p>
+<hr class="div"/>
+<h2>11. Onboarding flow (screens)</h2>
+<p>
+Visual path (left → right). Each box is one screen.
+</p>
+<p>
+```
+<br/>
+[1 Welcome] → [2 Geofence] → [3 Decoy tier] → [4 Duress PW]
+<br/>
+      → [5 Approver model] → [6 Transfer threshold] → [7 App masking]
+<br/>
+      → [8 Simulation] → [9 Done]
+<br/>
+```
+</p>
+<p>
+| # | Screen | Shows | User inputs | Education copy (short) |
+<br/>
+|---|--------|-------|-------------|------------------------|
+<br/>
+| <strong>1</strong> | Welcome / education | Plain-language why banks have limits and wallets often don’t; coercion as a first-class threat | Continue / Not now | “This adds a decoy vault and slow-lane for big sends. It does not hide you from the chain.” |
+<br/>
+| <strong>2</strong> | Home geofence | Map + radius slider; optional second trusted place | Pin home; set radius (e.g. 200m–2km) | “Outside this zone, Face ID alone won’t open your real vault.” |
+<br/>
+| <strong>3</strong> | Decoy balance tier | Quiet / Moderate / High-profile cards + suggested USD ranges (§9) | Pick tier; optional custom within band | “Pick what looks believable for <em>you</em>. Too small can backfire.” |
+<br/>
+| <strong>4</strong> | Duress password | Two fields + strength meter; never show side-by-side with primary PW | Set / confirm duress PW | “Same username. This password opens only the decoy. Practice it.” |
+<br/>
+| <strong>5</strong> | Approver model | Cards for (a)–(e) with Safety/Ease chips | Choose one; enroll contacts or service | “Who (or what) must bless large sends when you’re away from home?” |
+<br/>
+| <strong>6</strong> | Transfer threshold | Amount slider + currency; preview of time-lock duration | Set threshold (e.g. $1,000) + lock length | “Above this, outside the fence: delay and/or approval.” |
+<br/>
+| <strong>7</strong> | App masking | Preview of mundane shell (e.g. gym tracker) vs real UI | Enable/disable; set reveal code / gesture | “Masking must survive notifications and Face ID sheets—not just the icon.” |
+<br/>
+| <strong>8</strong> | Simulation mode | Safe sandbox: fake “outside fence + coercion” walkthrough; no real funds move | Run scenario; pass/fail checklist | “Practice once. Say the wrong password on purpose. See the decoy. Cancel freely.” |
+<br/>
+| <strong>9</strong> | Done | Summary of choices; link to settings; optional trusted-contact invite | Finish / Invite approver | “You can change these later. After a real duress use, rotate passwords from a safe place.” |
+</p>
+<p>
+<strong>Simulation mode (detail):</strong> scripted steps — (1) pretend GPS = outside, (2) Face ID OK, (3) enter duress PW → decoy balances, (4) attempt &gt;threshold send → see time-lock / approver toast, (5) logout → primary PW → real vault. Badge every screen <strong>SIMULATION · NO FUNDS MOVE</strong>.
+</p>
+<hr class="div"/>
+<h2>12. In-practice conditional flows (if-this → then-that)</h2>
+<p>
+Branching notation: <code>IF condition → UI state → NEXT</code>.
+</p>
+<h3>(a) At home · normal login → real vault</h3>
+<p>
+```
+<br/>
+IF inside geofence AND biometric OK AND (no PW required OR primary PW)
+<br/>
+  → UI: Real vault home (true balances)
+<br/>
+  → NEXT: normal send / card spend
+<br/>
+STUCK RISK: user forgets they enabled “always ask PW even at home”
+<br/>
+```
+</p>
+<h3>(b) Outside geofence · Face ID · primary password → real vault + large-send brakes</h3>
+<p>
+```
+<br/>
+IF outside geofence AND biometric OK
+<br/>
+  → UI: Secondary password sheet (no vault hint)
+<br/>
+IF password == primary
+<br/>
+  → UI: Real vault
+<br/>
+  → NEXT: sends ≥ threshold enter time-lock and/or approver queue
+<br/>
+STUCK RISK: user thinks Face ID failed; copy must say “password required away from home”
+<br/>
+```
+</p>
+<h3>(c) Outside geofence · Face ID · duress password → decoy vault</h3>
+<p>
+```
+<br/>
+IF outside geofence AND biometric OK AND password == duress
+<br/>
+  → UI: Decoy vault (calibrated balance, plausible history)
+<br/>
+  → NEXT: sends look instant in-decoy; no real-vault time-lock UI (avoid tell)
+<br/>
+STUCK RISK: notifications from real vault leaking; suppress or rewrite while decoy session active
+<br/>
+```
+</p>
+<h3>(d) Transfer above threshold · outside geofence</h3>
+<p>
+```
+<br/>
+IF real vault AND outside fence AND amount ≥ threshold
+<br/>
+  → UI: “Pending · unlocks in 24h” + Approver notified
+<br/>
+  → NEXT: wait | cancel | (if model allows) speed-up via second factor
+<br/>
+STUCK RISK: user in café needs rent now — show clear cancel + lower-threshold settings path
+<br/>
+```
+</p>
+<h3>(e) Approver unreachable → fallback</h3>
+<p>
+```
+<br/>
+IF approval pending AND approver timeout
+<br/>
+  → UI: Fallback banner
+<br/>
+  IF model == hybrid → escalate to service
+<br/>
+  IF model == person-only → extend lock + “try another enrolled contact” (if rotating)
+<br/>
+  IF model == delayed-self → continue countdown only
+<br/>
+STUCK RISK: silent failure; always show countdown + who was pinged (without revealing decoy existence)
+<br/>
+```
+</p>
+<h3>(f) Panic-drain trigger</h3>
+<p>
+```
+<br/>
+IF panic gesture/code entered (optional feature)
+<br/>
+  → UI: brief confirm (or zero-confirm if configured for true emergency)
+<br/>
+  → NEXT: move real hot funds to pre-set cold/deep path; decoy session may continue for cover
+<br/>
+STUCK RISK: mistype under stress; require rehearsal in Simulation; irreversible without recovery ceremony
+<br/>
+```
+</p>
+<h3>(g) App masking active · wrong reveal code</h3>
+<p>
+```
+<br/>
+IF masking ON AND launch/reveal code wrong
+<br/>
+  → UI: Mundane app (gym tracker / notes) full interaction
+<br/>
+  → NEXT: no wallet chrome, no crypto notifications
+<br/>
+STUCK RISK: user forgets reveal code — recovery must not be a visible “Forgot wallet password?” on the decoy shell
+<br/>
+```
+</p>
+<h3>Quick decision tree</h3>
+<p>
+```
+<br/>
+Launch
+<br/>
+ ├─ masking ON &amp; code wrong ──────────────→ Mundane UI (g)
+<br/>
+ └─ masking OFF or code OK
+<br/>
+      ├─ inside geofence ─────────────────→ Real vault (a) [policy may still ask PW]
+<br/>
+      └─ outside geofence
+<br/>
+           └─ Face ID → password sheet
+<br/>
+                ├─ primary PW ────────────→ Real vault + threshold brakes (b)(d)(e)
+<br/>
+                ├─ duress PW ─────────────→ Decoy vault (c)
+<br/>
+                └─ panic code ────────────→ Panic-drain (f) then optional decoy cover
+<br/>
+```
+</p>
+<h2>13. Phased next steps</h2>
+<ol>
+<li>1. <strong>Spec + threat model</strong> — formalize vault separation, geofence policy object, threshold / time-lock semantics, and coercion scenarios (home vs away).  </li>
+<li>2. <strong>Reference-wallet prototype</strong> — one open reference implementing duress password, decoy vault, geofence gate, and masked UI shell.  </li>
+<li>3. <strong>Neobank / card pilot</strong> — partner with a spend rail (pattern: <strong>RedotPay</strong>) and/or a self-custody product (pattern: <strong>EtherFi</strong>) to test UX under realistic send flows.  </li>
+<li>4. <strong>Publish vocabulary</strong> — release the minimal terms (duress password, geofence policy, transfer threshold, multi-sig hook) for adopters; keep UI and defaults plural.</li>
+</ol>
+<hr class="div"/>
+<h2>14. Non-goals</h2>
+<ul>
+<li>Replacing hardware security modules or seed backup best practices.  </li>
+<li>Endorsing mixers or anonymity pools; <strong>Tornado Cash</strong> appears only as a historical example of post-theft irreversibility.  </li>
+<li>Mandating identical decoy amounts or identical UI chrome across vendors.</li>
+</ul>
+<hr class="div"/>
+<h2>15. Closing</h2>
+<p>
+Duress-aware wallet security is a <strong>product and policy layer</strong> on top of self-custody: same identity, second password, decoy vault, geofenced high-value controls, and full-interaction app masking. Adopt it as a shared vocabulary and optional feature kit—so EtherFi-class wallets, RedotPay-class rails, and design partners (including <strong>Cast</strong>-grade UX) can harden coercion resistance without freezing into one attackable monoculture.
+</p>
+<hr class="div"/>
+<p>
+<em>Editable working draft · for engineers and partners · examples limited to EtherFi, RedotPay, Cast, Tornado Cash</em>
+</p>
+<p class="footer-note">Duress-Aware Wallet Security Standard · Project proposal reader · Not legal or investment advice</p>
+</div></div>
+</body></html>

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Duress-Aware Wallet — Threat model findings</title>
+<style>
+  :root {
+    --bg: #F7F6F3; --paper: #FFFFFF; --ink: #37352F; --mute: #6B6A65; --line: #E9E8E4;
+    --blue: #E7F0FD; --blue-ink: #1F4E9B; --blue-edge: #C5D9F7;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+    font: 400 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased; padding-bottom: env(safe-area-inset-bottom, 0px); }
+  .wrap { max-width: 820px; margin: 0 auto; padding: 48px 28px 96px; }
+  .paper { background: var(--paper); border-radius: 12px; padding: 56px 52px;
+    box-shadow: 0 1px 2px rgba(0,0,0,.04); border: 1px solid var(--line); }
+  .nav { font-size: 13px; margin-bottom: 20px; }
+  .nav a { color: var(--blue-ink); text-decoration: none; font-weight: 600; }
+  .nav a:hover { text-decoration: underline; }
+  h1 { font-size: 32px; line-height: 1.2; letter-spacing: -.02em; margin: 0 0 16px; }
+  h2 { font-size: 22px; margin: 28px 0 12px; }
+  h3 { font-size: 16px; margin: 22px 0 8px; }
+  p { margin: 0 0 14px; }
+  ul, ol { margin: 0 0 14px; padding-left: 22px; }
+  li { margin-bottom: 6px; }
+  blockquote { margin: 16px 0; padding: 12px 14px; background: var(--blue);
+    border: 1px solid var(--blue-edge); border-radius: 8px; color: var(--blue-ink); }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px;
+    background: #FAFAF8; padding: 1px 5px; border-radius: 4px; border: 1px solid var(--line); }
+  hr.div { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+  .footer-note { font-size: 13px; color: var(--mute); margin-top: 32px; }
+  img { max-width: 100%; height: auto; }
+  @media (max-width: 640px) {
+    .wrap { padding: 16px 10px calc(48px + env(safe-area-inset-bottom, 0px)); }
+    .paper { padding: 24px 16px; }
+    h1 { font-size: 24px; }
+    h2 { font-size: 19px; }
+  }
+  @media (max-width: 480px) {
+    .wrap { padding: 12px 8px calc(40px + env(safe-area-inset-bottom, 0px)); }
+    .paper { padding: 20px 14px; }
+    h1 { font-size: 22px; }
+    h2 { font-size: 18px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap"><div class="paper">
+<p class="nav"><a href="index.html">← Proposal home</a></p>
+<h1>Threat-model findings (companion to matrix)</h1>
+<p>
+<strong>Diagram:</strong> <code>duress-aware-threat-model-matrix.png</code>  
+<br/>
+<strong>Proposal:</strong> <code>duress-aware-wallet-security-standard.md</code>
+</p>
+<h2>Key findings</h2>
+<ol>
+<li>1. <strong>Best coverage is away-from-home coercion with a live phone.</strong> Armed robbery or kidnapping outside the geofence is where the stack works together: duress password → decoy vault, geofence-gated second password, time-lock and/or multi-sig on large sends, optional panic-drain.</li>
+</ol>
+<ol>
+<li>2. <strong>Forced biometric alone is not enough if vault choice is password-bound.</strong> Outside the fence, Face ID should only unlock the device gate; which vault opens depends on the password. That breaks the “face = full treasury” failure mode.</li>
+</ol>
+<ol>
+<li>3. <strong>GPS spoofing punches a hole in geofence policy.</strong> If “at home” can be faked, secondary-password and outside-fence rules may never fire. Multi-sig and time-locks still help; geofence itself does not. Treat location integrity as a hard dependency or fail closed.</li>
+</ol>
+<ol>
+<li>4. <strong>Largest product gap: attacker demands the “real” password after a decoy transfer.</strong> No cell in that row is green. Calibration, training, and plausible deniability matter more than another control checkbox—and there is no cryptographic fix once the attacker knows a decoy exists.</li>
+</ol>
+<ol>
+<li>5. <strong>Seed-phrase social engineering is largely out of band.</strong> App masking helps slightly (harder to spot a wallet). Duress/geofence/time-lock/multi-sig do not stop someone giving away a seed. Separate backup and recovery hygiene are required.</li>
+</ol>
+<ol>
+<li>6. <strong>Mixers make post-theft recovery fail; pre-broadcast controls are the only window.</strong> Time-lock and multi-sig are the primary brakes before funds hit irreversible privacy rails. Duress/decoy only limits how much leaves in the first session.</li>
+</ol>
+<ol>
+<li>7. <strong>Home coercion (inside geofence) is an explicit gap in geofence-gated defenses.</strong> Inside the radius, rely on duress password + believable decoy; do not assume location policy saves the user.</li>
+</ol>
+<ol>
+<li>8. <strong>Panic-drain is optional and partial.</strong> Useful as a last-resort movement of real funds to a deep cold path, but dangerous if discoverable or mistyped under stress—keep it optional and well-rehearsed.</li>
+</ol>
+<p class="footer-note">Duress-Aware Wallet Security Standard · Project proposal reader · Not legal or investment advice</p>
+</div></div>
+</body></html>

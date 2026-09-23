@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Duress-Aware Wallet Security Standard — Project Proposal</title>
+<meta name="description" content="A feature-layer proposal for self-custody wallets that survive coercion: decoy vault, geofence, time-locks, multi-sig, and threat-model matrix."/>
+<style>
+  :root {
+    --bg: #F7F6F3;
+    --paper: #FFFFFF;
+    --ink: #37352F;
+    --mute: #6B6A65;
+    --line: #E9E8E4;
+    --blue: #E7F0FD; --blue-ink: #1F4E9B; --blue-edge: #C5D9F7;
+    --amber: #FBF3DB; --amber-ink: #8A6A1A; --amber-edge: #F0E0A8;
+    --green: #E8F5E9; --green-ink: #1B6B3A; --green-edge: #BFDDBF;
+    --purple: #F3EAFE; --purple-ink: #5B2B9E; --purple-edge: #DCC7F5;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font: 400 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .wrap { max-width: 820px; margin: 0 auto; padding: 48px 28px 96px; }
+  .paper {
+    background: var(--paper); border-radius: 12px; padding: 56px 52px;
+    box-shadow: 0 1px 2px rgba(0,0,0,.04); border: 1px solid var(--line);
+  }
+  .kicker { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--mute); font-weight: 600; margin: 0 0 12px; }
+  h1 { font-size: 36px; line-height: 1.2; letter-spacing: -.02em; font-weight: 700; margin: 0 0 12px; }
+  .tagline { font-size: 18px; color: var(--mute); margin: 0 0 20px; }
+  .summary { margin: 0 0 28px; font-size: 16px; }
+  hr.div { border: 0; border-top: 1px solid var(--line); margin: 32px 0; }
+  h2 { font-size: 20px; margin: 0 0 14px; font-weight: 700; }
+  .cards { display: grid; gap: 12px; margin: 0 0 8px; }
+  a.card {
+    display: block; text-decoration: none; color: inherit;
+    border: 1px solid var(--line); border-radius: 10px; overflow: hidden;
+    background: #fff; transition: border-color .15s, box-shadow .15s;
+  }
+  a.card:hover, a.card:focus-visible {
+    border-color: var(--blue-edge); box-shadow: 0 2px 8px rgba(31,78,155,.08);
+    outline: none;
+  }
+  a.card .hd { padding: 10px 16px; font-weight: 700; font-size: 14px; }
+  a.card .bd { padding: 12px 16px 14px; font-size: 14px; color: var(--mute); }
+  .hd-amber { background: var(--amber); color: var(--amber-ink); }
+  .hd-blue { background: var(--blue); color: var(--blue-ink); }
+  .hd-green { background: var(--green); color: var(--green-ink); }
+  .hd-purple { background: var(--purple); color: var(--purple-ink); }
+  .meta-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 0; }
+  .pill {
+    display: inline-block; padding: 2px 8px; border-radius: 999px;
+    font-size: 11px; font-weight: 700; background: #FAFAF8; color: var(--mute);
+    border: 1px solid var(--line);
+  }
+  .preview {
+    margin: 20px 0 0; border: 1px solid var(--line); border-radius: 10px;
+    overflow: hidden; background: #FAFAF8;
+  }
+  .preview img { display: block; width: 100%; height: auto; }
+  .preview .cap { padding: 10px 14px; font-size: 13px; color: var(--mute); }
+  .footer-note { font-size: 13px; color: var(--mute); margin-top: 32px; }
+  .secondary { margin-top: 18px; font-size: 14px; color: var(--mute); }
+  .secondary a { color: var(--blue-ink); font-weight: 600; }
+  img { max-width: 100%; height: auto; }
+  @media (max-width: 640px) {
+    .wrap { padding: 16px 10px calc(48px + env(safe-area-inset-bottom, 0px)); }
+    .paper { padding: 24px 16px; border-radius: 10px; }
+    h1 { font-size: 24px; line-height: 1.25; }
+    h2 { font-size: 18px; }
+    .tagline { font-size: 16px; }
+    hr.div { margin: 24px 0; }
+  }
+  @media (max-width: 480px) {
+    .wrap { padding: 12px 8px calc(40px + env(safe-area-inset-bottom, 0px)); }
+    .paper { padding: 20px 14px; }
+    h1 { font-size: 22px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="paper">
+
+  <p class="kicker">Project proposal</p>
+  <h1>Duress-Aware Wallet Security Standard</h1>
+  <p class="tagline">A feature layer for self-custody that survives coercion — without pretending a gunman can’t open your phone.</p>
+
+  <p class="summary">Self-custodial wallets give users key control but almost none of the operational brakes people expect from banks. This proposal defines an adoptable feature layer built around a second password that opens a <strong>decoy vault</strong>, geofenced secondary authentication, time-locks and multi-sig on large transfers, optional app masking, and an optional panic-drain path — plus a threat-model matrix of what each control covers, partially covers, or leaves as a gap.</p>
+
+  <div class="meta-row">
+    <span class="pill">Feature-layer proposal</span>
+    <span class="pill">Engineers &amp; partners</span>
+    <span class="pill">Mobile-readable</span>
+  </div>
+
+  <hr class="div"/>
+
+  <h2>Read the proposal</h2>
+  <div class="cards">
+    <a class="card" href="part1.html">
+      <div class="hd hd-amber">Part 1 · Problem, features &amp; threat matrix</div>
+      <div class="bd">Executive summary, bank-vs-wallet gap, decoy calibration, multi-sig models, and the attacker × defense matrix (cards on phone, grid on desktop).</div>
+    </a>
+    <a class="card" href="part2.html">
+      <div class="hd hd-blue">Part 2 · Onboarding, flows &amp; roadmap</div>
+      <div class="bd">Nine onboarding screens (incl. Simulation), in-practice UI trees, positioning vocabulary, open risks, phased roadmap, glossary.</div>
+    </a>
+    <a class="card" href="matrix.html">
+      <div class="hd hd-green">Threat-model matrix</div>
+      <div class="bd">Standalone matrix page — swipeable sticky-column table on desktop; stacked status cards on ~390px phones.</div>
+    </a>
+    <a class="card" href="security-standard.html">
+      <div class="hd hd-purple">Full markdown (HTML reader)</div>
+      <div class="bd">Complete security-standard document as a single scrollable HTML page. Source also available as <code>security-standard.md</code>.</div>
+    </a>
+  </div>
+
+  <p class="secondary">Also: <a href="findings.html">threat-model findings</a> · <a href="security-standard.md">security-standard.md</a> · <a href="findings.md">findings.md</a> · <a href="matrix.png">matrix.png</a> (phone stacked) · <a href="matrix-desktop.png">matrix-desktop.png</a> (wide grid)</p>
+
+  <div class="preview">
+    <a href="matrix.html" aria-label="Open threat matrix"><img src="matrix.png" alt="Threat model matrix as stacked cards per attacker capability"/></a>
+    <div class="cap">Preview: mobile threat matrix (stacked cards). Tap to open the interactive HTML version.</div>
+  </div>
+
+  <hr class="div"/>
+
+  <h2>Suggested personal-site link</h2>
+  <p class="secondary" style="margin:0">Slug: <code>/projects/duress-aware-wallet</code> → point at this folder’s <code>index.html</code>. See <a href="README.md">README.md</a> for a short project blurb.</p>
+
+  <p class="footer-note">Duress-Aware Wallet Security Standard · Static project proposal package · Not legal or investment advice · Examples limited to EtherFi, RedotPay, Cast, Tornado Cash</p>
+
+</div>
+</div>
+</body>
+</html>

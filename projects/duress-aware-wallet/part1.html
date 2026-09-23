@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Duress-Aware Wallet Security Standard — Part 1</title>
+<style>
+  :root {
+    --bg: #F7F6F3;
+    --paper: #FFFFFF;
+    --ink: #37352F;
+    --mute: #6B6A65;
+    --line: #E9E8E4;
+    --blue: #E7F0FD; --blue-ink: #1F4E9B; --blue-edge: #C5D9F7;
+    --amber: #FBF3DB; --amber-ink: #8A6A1A; --amber-edge: #F0E0A8;
+    --green: #E8F5E9; --green-ink: #1B6B3A; --green-edge: #BFDDBF;
+    --red: #FDECEC; --red-ink: #9B1C1C; --red-edge: #F3C1C1;
+    --purple: #F3EAFE; --purple-ink: #5B2B9E; --purple-edge: #DCC7F5;
+    --teal: #E6F7F4; --teal-ink: #0B6B5C;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font: 400 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 820px; margin: 0 auto; padding: 48px 28px 96px; }
+  .paper {
+    background: var(--paper); border-radius: 12px; padding: 56px 52px;
+    box-shadow: 0 1px 2px rgba(0,0,0,.04); border: 1px solid var(--line);
+  }
+.kicker { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--mute); font-weight: 600; margin: 0 0 12px; }
+  h1 { font-size: 36px; line-height: 1.2; letter-spacing: -.02em; font-weight: 700; margin: 0 0 12px; }
+  .tagline { font-size: 18px; color: var(--mute); margin: 0 0 8px; }
+  .meta { font-size: 13px; color: var(--mute); margin-top: 24px; }
+  hr.div { border: 0; border-top: 1px solid var(--line); margin: 40px 0; }
+  h2 { font-size: 24px; letter-spacing: -.01em; margin: 0 0 16px; font-weight: 700; }
+  h3 { font-size: 16px; margin: 28px 0 10px; font-weight: 700; }
+  p { margin: 0 0 14px; }
+  .callout {
+    border-radius: 8px; padding: 14px 16px; margin: 18px 0;
+    border: 1px solid transparent; display: flex; gap: 12px; align-items: flex-start;
+  }
+  .callout .ico { font-size: 18px; line-height: 1.4; flex: 0 0 auto; }
+  .callout .body { flex: 1; font-size: 15px; }
+  .callout .body strong { font-weight: 700; }
+  .c-blue { background: var(--blue); border-color: var(--blue-edge); color: var(--blue-ink); }
+  .c-amber { background: var(--amber); border-color: var(--amber-edge); color: var(--amber-ink); }
+  .c-green { background: var(--green); border-color: var(--green-edge); color: var(--green-ink); }
+  .c-red { background: var(--red); border-color: var(--red-edge); color: var(--red-ink); }
+  .c-purple { background: var(--purple); border-color: var(--purple-edge); color: var(--purple-ink); }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; margin: 16px 0 8px; }
+  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--mute); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; background: #FAFAF8; }
+  tr.rec td { background: var(--green); }
+  .feat {
+    border: 1px solid var(--line); border-radius: 10px; overflow: hidden; margin: 18px 0;
+  }
+  .feat .hd { padding: 10px 16px; font-weight: 700; font-size: 14px; letter-spacing: .02em; }
+  .feat .bd { padding: 14px 16px 16px; background: #fff; }
+  .hd-blue { background: var(--blue); color: var(--blue-ink); }
+  .hd-amber { background: var(--amber); color: var(--amber-ink); }
+  .hd-green { background: var(--green); color: var(--green-ink); }
+  .hd-purple { background: var(--purple); color: var(--purple-ink); }
+  .hd-red { background: var(--red); color: var(--red-ink); }
+  .hd-teal { background: var(--teal); color: var(--teal-ink); }
+  .flow {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 20px 0;
+    padding: 18px; background: #FAFAF8; border-radius: 10px; border: 1px dashed var(--line);
+  }
+  .chip {
+    background: #fff; border: 1px solid var(--line); border-radius: 8px;
+    padding: 8px 12px; font-size: 13px; font-weight: 600; color: var(--ink);
+  }
+  .chip.warn { background: var(--amber); border-color: var(--amber-edge); color: var(--amber-ink); }
+  .chip.bad { background: var(--red); border-color: var(--red-edge); color: var(--red-ink); }
+  .chip.ok { background: var(--green); border-color: var(--green-edge); color: var(--green-ink); }
+  .chip.safe { background: var(--blue); border-color: var(--blue-edge); color: var(--blue-ink); }
+  .arrow { color: var(--mute); font-weight: 700; }
+.cell { display: inline-block; min-width: 64px; padding: 4px 8px; border-radius: 6px; font-weight: 700; font-size: 11px; }
+  .covers { background: var(--green); color: var(--green-ink); }
+  .partial { background: var(--amber); color: var(--amber-ink); }
+  .gap { background: var(--red); color: var(--red-ink); }
+  .legend { display: flex; gap: 12px; flex-wrap: wrap; font-size: 13px; color: var(--mute); margin-top: 8px; }
+  .pill { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 700; }
+  .pill-rec { background: var(--green); color: var(--green-ink); }
+  ul { margin: 0 0 14px; padding-left: 20px; }
+  li { margin-bottom: 6px; }
+  .footer-note { font-size: 13px; color: var(--mute); margin-top: 32px; }
+
+  img { max-width: 100%; height: auto; }
+  .table-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+    max-width: 100%;
+    margin: 16px 0 8px;
+    position: relative;
+  }
+  .table-scroll > table { margin-top: 0; margin-bottom: 0; }
+  .table-hint {
+    display: none;
+    font-size: 12px;
+    color: var(--mute);
+    margin: 0 0 6px;
+    font-weight: 600;
+  }
+  .matrix {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+    max-width: 100%;
+    margin: 16px 0;
+  }
+  .matrix table { min-width: 720px; font-size: 12px; }
+  .matrix th, .matrix td { text-align: center; padding: 8px 6px; }
+  .matrix th:first-child,
+  .matrix td:first-child {
+    text-align: left;
+    min-width: 140px;
+    position: sticky;
+    left: 0;
+    z-index: 2;
+    box-shadow: 2px 0 6px -2px rgba(0,0,0,.14);
+  }
+  .matrix th:first-child { background: #FAFAF8; }
+  .matrix td:first-child { background: #fff; z-index: 1; }
+  .matrix-cards { display: none; margin: 16px 0; }
+  .m-card {
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 0 0 12px;
+    background: #fff;
+  }
+  .m-card .m-hd {
+    padding: 12px 14px;
+    font-weight: 700;
+    font-size: 14px;
+    background: #FAFAF8;
+    border-bottom: 1px solid var(--line);
+  }
+  .m-card .m-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--line);
+    font-size: 13px;
+  }
+  .m-card .m-row:last-child { border-bottom: 0; }
+  .m-card .m-def { color: var(--ink); flex: 1; min-width: 0; overflow-wrap: anywhere; }
+  .m-card .cell { flex: 0 0 auto; min-width: 56px; text-align: center; }
+  body {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  @media (max-width: 640px) {
+    .wrap { padding: 16px 10px calc(48px + env(safe-area-inset-bottom, 0px)); }
+    .paper { padding: 24px 16px; border-radius: 10px; }
+    h1 { font-size: 24px; line-height: 1.25; }
+    h2 { font-size: 19px; }
+    .tagline { font-size: 16px; }
+    hr.div { margin: 28px 0; }
+    th, td {
+      padding: 8px 10px;
+      word-break: break-word;
+      overflow-wrap: anywhere;
+    }
+    table { font-size: 13px; }
+    .table-hint { display: block; }
+    .flow { padding: 14px; gap: 6px; }
+    .arrow { display: none; }
+    .chip { font-size: 12px; padding: 7px 10px; }
+    .matrix { display: none; }
+    .matrix-cards { display: block; }
+    .callout { padding: 12px 14px; }
+    .feat .bd { padding: 12px 14px 14px; }
+    .feat { overflow: visible; }
+  }
+  @media (max-width: 480px) {
+    .wrap { padding: 12px 8px calc(40px + env(safe-area-inset-bottom, 0px)); }
+    .paper { padding: 20px 14px; }
+    h1 { font-size: 22px; }
+    h2 { font-size: 18px; }
+    th, td { padding: 7px 8px; }
+    .cell { min-width: 52px; font-size: 10px; padding: 3px 6px; }
+  }
+
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="paper">
+
+  <p class="kicker" style="margin-bottom:8px"><a href="index.html" style="color:inherit;text-decoration:none">← Proposal home</a></p>
+
+  <!-- 1. Title -->
+  <p class="kicker">Feature proposal · Part 1 of 2</p>
+  <h1>Duress-Aware Wallet Security Standard</h1>
+  <p class="tagline">A feature layer for self-custody that survives coercion — without pretending a gunman can’t open your phone.</p>
+  <p class="meta">For engineers &amp; partners · Examples limited to EtherFi, RedotPay, Cast, Tornado Cash · Editable working draft</p>
+
+  <hr class="div"/>
+
+  <!-- 2. Executive summary -->
+  <h2>1. Executive summary</h2>
+  <p>Self-custodial wallets give users key control but almost none of the operational brakes people expect from banks: withdrawal limits, cool-downs, trusted approvers, or a credible answer to physical force. Face ID opens the real vault for anyone who can press a phone to the owner’s face; once funds leave through a mixer, recovery is effectively gone.</p>
+  <p>This proposal defines an <strong>adoptable feature layer</strong> — not one rigid UI — built around a second password that opens a <strong>decoy vault</strong>, geofenced secondary authentication, time-locks and multi-sig on large transfers, optional app masking, and an optional panic-drain path.</p>
+  <div class="callout c-amber">
+    <div class="ico">💡</div>
+    <div class="body"><strong>The thing a gunman can force out of you stops being the real vault.</strong> Same username; a second password opens a believable decoy holding a substantial but non-devastating sum. Logout + the original password restores the real vault.</div>
+  </div>
+
+  <hr class="div"/>
+
+  <!-- 3. Problem -->
+  <h2>2. Problem statement</h2>
+  <p>Retail banking and card rails routinely expose daily limits, holds, and dispute paths. Hot self-custody and spend rails (EtherFi-class wallets, RedotPay-class cards) settle immediately once a signature broadcasts. Biometrics map 1:1 to full spending authority. Coercion + Face ID + mixer laundering (historically exemplified by Tornado Cash) collapses recovery.</p>
+
+  <div class="table-scroll" role="region" aria-label="Bank vs wallet capability comparison" tabindex="0">
+  <p class="table-hint">Swipe for more →</p>
+  <table>
+    <thead>
+      <tr><th>Capability</th><th>Typical bank / card rail</th><th>Typical self-custodial wallet</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Withdrawal / transfer limits</td><td>Yes — policy enforced by issuer</td><td>Rare — keys = full authority</td></tr>
+      <tr><td>Cool-down / hold on unusual amounts</td><td>Common</td><td>Usually none</td></tr>
+      <tr><td>Undo / dispute after send</td><td>Partial (chargeback, freeze)</td><td>None on L1 after broadcast</td></tr>
+      <tr><td>Response to physical coercion</td><td>Limits + branch / fraud ops</td><td>Face ID unlocks the real treasury</td></tr>
+      <tr><td>Fund tracing after theft</td><td>Regulated rails help</td><td>Mixers / privacy pools erase the trail</td></tr>
+    </tbody>
+  </table>
+</div>
+  <div class="callout c-red">
+    <div class="ico">⚠️</div>
+    <div class="body"><strong>Masking the icon is not enough.</strong> Disguise must survive the full interaction — notifications, biometric sheets, balances, send flow — or it collapses under shoulder-surfing. Treat masking as an end-to-end state (Cast-grade UX), not a skin.</div>
+  </div>
+
+  <hr class="div"/>
+
+  <!-- 4. Solution overview -->
+  <h2>3. Solution overview</h2>
+  <p>Under duress away from home, the attacker gets a vault that looks real and can move a calibrated sum. The real vault never unlocks.</p>
+  <div class="flow" aria-label="Duress flow">
+    <span class="chip bad">Attacker demands unlock</span>
+    <span class="arrow">→</span>
+    <span class="chip">Face ID</span>
+    <span class="arrow">→</span>
+    <span class="chip warn">Secondary password</span>
+    <span class="arrow">→</span>
+    <span class="chip warn">Decoy vault</span>
+    <span class="arrow">→</span>
+    <span class="chip">~$3K moves</span>
+    <span class="arrow">→</span>
+    <span class="chip ok">Real vault untouched</span>
+  </div>
+  <div class="callout c-blue">
+    <div class="ico">ℹ️</div>
+    <div class="body">Inside the home geofence, products may relax secondary prompts for daily spend. Outside it, biometric is only a device gate — the password chooses <em>which</em> vault opens.</div>
+  </div>
+
+  <hr class="div"/>
+
+  <!-- 5. Feature breakdown -->
+  <h2>4. Feature breakdown</h2>
+
+  <div class="feat">
+    <div class="hd hd-amber">Duress password &amp; decoy calibration</div>
+    <div class="bd">
+      <p>Same identity. Primary password → real vault. Duress password → decoy vault (~$3,000 illustrative default for moderate users). Logout + primary restores real.</p>
+      <div class="table-scroll" role="region" aria-label="Decoy calibration tiers" tabindex="0">
+  <p class="table-hint">Swipe for more →</p>
+  <table>
+        <thead><tr><th>Tier</th><th>Suggested decoy (USD)</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td>Quiet / new</td><td><strong>$500 – $2,000</strong></td><td>Believable hot wallet; survivable loss</td></tr>
+          <tr><td>Moderate activity</td><td><strong>$3,000 – $8,000</strong></td><td>Default band; short-inspection plausible</td></tr>
+          <tr><td>High-profile / large history</td><td><strong>$15,000 – $50,000</strong> (≤5–10% of hot funds)</td><td>Low decoy fails against known wealth</td></tr>
+        </tbody>
+      </table>
+</div>
+      <p style="margin:8px 0 0;font-size:14px;color:var(--mute)"><strong>Default funding:</strong> static (or rarely reviewed). Optional slow drift only — never auto-mirror real deposits. Skip decoy if the attacker likely already knows exact holdings.</p>
+    </div>
+  </div>
+
+  <div class="feat">
+    <div class="hd hd-blue">Biometric gating</div>
+    <div class="bd">
+      <p>Face ID alone is insufficient outside a trusted context. Outside the geofence, biometric unlocks the device gate only; a password selects the vault. Breaks the failure mode where a forced face equals the full treasury.</p>
+    </div>
+  </div>
+
+  <div class="feat">
+    <div class="hd hd-teal">Geofence rules</div>
+    <div class="bd">
+      <ul>
+        <li>Configure home / trusted radii as a <strong>policy object</strong> (not one hard-coded map).</li>
+        <li><strong>Outside radius:</strong> secondary password required for vault selection.</li>
+        <li>GPS spoofing is a known hole — pair with integrity signals or fail closed (see threat matrix).</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="feat">
+    <div class="hd hd-green">Transfer safeguards</div>
+    <div class="bd">
+      <ul>
+        <li><strong>24h time-lock</strong> on transfers above an illustrative <strong>$1,000</strong> threshold when outside the fence.</li>
+        <li><strong>Multi-sig / trusted approver</strong> for the same class of sends (see §5).</li>
+        <li><strong>Optional allowlists</strong> for known destinations to reduce false friction.</li>
+        <li><strong>Emergency override</strong> paths must be rare, audited, and rehearsed — never a silent bypass.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="feat">
+    <div class="hd hd-purple">App masking</div>
+    <div class="bd">
+      <p>Wallet presents as a mundane app (e.g. gym tracker) until a reveal code / gesture opens the real UI. Must survive notifications, biometric prompt copy, and deep links — not just the home-screen icon. Wrong code → full mundane interaction. Biometric fallback must not flash wallet chrome on the disguise shell.</p>
+    </div>
+  </div>
+
+  <div class="feat">
+    <div class="hd hd-red">Panic-drain layer (optional)</div>
+    <div class="bd">
+      <p>A third password / gesture can move real hot funds to a pre-set burner / deep cold address while a decoy session continues for cover. High mistype risk — require Simulation rehearsal. Keep optional.</p>
+    </div>
+  </div>
+
+  <hr class="div"/>
+
+  <!-- 6. Multi-sig models -->
+  <h2>5. Multi-sig approver models</h2>
+  <p>Safety 1–5 = harder for a coerced user alone to move large funds. Ease 1–5 = less daily friction. Relative brainstorm scores, not audits.</p>
+  <div class="table-scroll" role="region" aria-label="Multi-sig approver models" tabindex="0">
+  <p class="table-hint">Swipe for more →</p>
+  <table>
+    <thead>
+      <tr><th>Model</th><th>How it works</th><th>Safety</th><th>Ease</th><th>Failure modes</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Trusted person + min-distance</td>
+        <td>Human co-signer; approval only counts if geographically separated from the user</td>
+        <td><strong>5</strong></td><td>2</td>
+        <td>Unavailable; same-city travel; coercion of approver</td>
+      </tr>
+      <tr>
+        <td>Third-party service / custodian</td>
+        <td>Policy engine or regulated co-signer under SLA</td>
+        <td>4</td><td>4</td>
+        <td>Outage; service ATO; AML friction; cost</td>
+      </tr>
+      <tr class="rec">
+        <td><span class="pill pill-rec">Recommended</span><br/>Hybrid · person + service fallback</td>
+        <td>Ping trusted person first; escalate to service after timeout under same threshold rules</td>
+        <td><strong>5</strong></td><td>3</td>
+        <td>Double dependency; path confusion; slower under active duress</td>
+      </tr>
+      <tr>
+        <td>Rotating approvers</td>
+        <td>Round-robin / random from a pre-approved list</td>
+        <td>4</td><td>2</td>
+        <td>Coordination load; stale contacts; weak-link approve</td>
+      </tr>
+      <tr>
+        <td>Delayed self-approval</td>
+        <td>No second party — long lock (24–72h), user can cancel, then self-finalize</td>
+        <td>3</td><td><strong>5</strong></td>
+        <td>Patient attacker waits it out; no external check</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+  <div class="callout c-green">
+    <div class="ico">✅</div>
+    <div class="body"><strong>Recommended default for partners: Hybrid.</strong> Highest practical safety with a fallback when the human is unreachable. Delayed self-approval is easiest to ship but weakest against a patient attacker.</div>
+  </div>
+
+  <hr class="div"/>
+
+  <!-- 7. Threat matrix -->
+  <h2>6. Threat-model matrix</h2>
+  <p>Attacker capabilities (rows) × defenses (columns). <span class="cell covers">Covers</span> · <span class="cell partial">Partial</span> · <span class="cell gap">Gap</span></p>
+  <div class="matrix">
+  <table>
+    <thead>
+      <tr>
+        <th>Attack ↓ / Defense →</th>
+        <th>Duress PW</th>
+        <th>Geofence 2nd PW</th>
+        <th>Time-lock</th>
+        <th>Multi-sig</th>
+        <th>App masking</th>
+        <th>Panic-drain</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Armed robbery (unknown loc.)</td>
+        <td><span class="cell covers">Covers</span></td>
+        <td><span class="cell covers">Covers</span></td>
+        <td><span class="cell covers">Covers</span></td>
+        <td><span class="cell covers">Covers</span></td>
+        <td><span class="cell partial">Partial</span></td>
+        <td><span class="cell partial">Partial</span></td>
+      </tr>
+      <tr>
+        <td>Kidnapping + forced biometric</td>
+        <td><span class="cell covers">Covers</span></td>
+        <td><span class="cell covers">Covers</span></td>
+        <td><span class="cell partial">Partial</span></td>
+        <td><span class="cell covers">Covers</span></td>
+        <td><span class="cell gap">Gap</span></td>
+        <td><span class="cell partial">Partial</span></td>
+      </tr>
+      <tr>
+        <td>GPS / location spoofing</td>
+        <td><span class="cell partial">Partial</span></td>
+        <td><span class="cell gap">Gap</span></td>
+        <td><span class="cell partial">Partial</span></td>
+        <td><span class="cell covers">Covers</span></td>
+        <td><span class="cell gap">Gap</span></td>
+        <td><span class="cell gap">Gap</span></td>
+      </tr>
+      <tr>
+        <td>Demand real PW after decoy xfer</td>
+        <td><span class="cell gap">Gap</span></td>
+        <td><span class="cell gap">Gap</span></td>
+        <td><span class="cell gap">Gap</span></td>
+        <td><span class="cell gap">Gap</span></td>
+        <td><span class="cell gap">Gap</span></td>
+        <td><span class="cell gap">Gap</span></td>
+      </tr>
+      <tr>
+        <td>Seed-phrase social engineering</td>
+        <td><span class="cell gap">Gap</span></td>
+        <td><span class="cell gap">Gap</span></td>
+        <td><span class="cell gap">Gap</span></td>
+        <td><span class="cell gap">Gap</span></td>
+        <td><span class="cell partial">Partial</span></td>
+        <td><span class="cell gap">Gap</span></td>
+      </tr>
+      <tr>
+        <td>Mixer laundering</td>
+        <td><span class="cell partial">Partial</span></td>
+        <td><span class="cell partial">Partial</span></td>
+        <td><span class="cell covers">Covers</span></td>
+        <td><span class="cell covers">Covers</span></td>
+        <td><span class="cell gap">Gap</span></td>
+        <td><span class="cell partial">Partial</span></td>
+      </tr>
+      <tr>
+        <td>Coercion at home (inside fence)</td>
+        <td><span class="cell covers">Covers</span></td>
+        <td><span class="cell gap">Gap</span></td>
+        <td><span class="cell gap">Gap</span></td>
+        <td><span class="cell partial">Partial</span></td>
+        <td><span class="cell partial">Partial</span></td>
+        <td><span class="cell partial">Partial</span></td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="matrix-cards" aria-label="Threat matrix as cards">
+    <div class="m-card">
+      <div class="m-hd">Armed robbery (unknown loc.)</div>
+      <div class="m-row"><span class="m-def">Duress PW</span><span class="cell covers">Covers</span></div>
+      <div class="m-row"><span class="m-def">Geofence 2nd PW</span><span class="cell covers">Covers</span></div>
+      <div class="m-row"><span class="m-def">Time-lock</span><span class="cell covers">Covers</span></div>
+      <div class="m-row"><span class="m-def">Multi-sig</span><span class="cell covers">Covers</span></div>
+      <div class="m-row"><span class="m-def">App masking</span><span class="cell partial">Partial</span></div>
+      <div class="m-row"><span class="m-def">Panic-drain</span><span class="cell partial">Partial</span></div>
+    </div>
+    <div class="m-card">
+      <div class="m-hd">Kidnapping + forced biometric</div>
+      <div class="m-row"><span class="m-def">Duress PW</span><span class="cell covers">Covers</span></div>
+      <div class="m-row"><span class="m-def">Geofence 2nd PW</span><span class="cell covers">Covers</span></div>
+      <div class="m-row"><span class="m-def">Time-lock</span><span class="cell partial">Partial</span></div>
+      <div class="m-row"><span class="m-def">Multi-sig</span><span class="cell covers">Covers</span></div>
+      <div class="m-row"><span class="m-def">App masking</span><span class="cell gap">Gap</span></div>
+      <div class="m-row"><span class="m-def">Panic-drain</span><span class="cell partial">Partial</span></div>
+    </div>
+    <div class="m-card">
+      <div class="m-hd">GPS / location spoofing</div>
+      <div class="m-row"><span class="m-def">Duress PW</span><span class="cell partial">Partial</span></div>
+      <div class="m-row"><span class="m-def">Geofence 2nd PW</span><span class="cell gap">Gap</span></div>
+      <div class="m-row"><span class="m-def">Time-lock</span><span class="cell partial">Partial</span></div>
+      <div class="m-row"><span class="m-def">Multi-sig</span><span class="cell covers">Covers</span></div>
+      <div class="m-row"><span class="m-def">App masking</span><span class="cell gap">Gap</span></div>
+      <div class="m-row"><span class="m-def">Panic-drain</span><span class="cell gap">Gap</span></div>
+    </div>
+    <div class="m-card">
+      <div class="m-hd">Demand real PW after decoy xfer</div>
+      <div class="m-row"><span class="m-def">Duress PW</span><span class="cell gap">Gap</span></div>
+      <div class="m-row"><span class="m-def">Geofence 2nd PW</span><span class="cell gap">Gap</span></div>
+      <div class="m-row"><span class="m-def">Time-lock</span><span class="cell gap">Gap</span></div>
+      <div class="m-row"><span class="m-def">Multi-sig</span><span class="cell gap">Gap</span></div>
+      <div class="m-row"><span class="m-def">App masking</span><span class="cell gap">Gap</span></div>
+      <div class="m-row"><span class="m-def">Panic-drain</span><span class="cell gap">Gap</span></div>
+    </div>
+    <div class="m-card">
+      <div class="m-hd">Seed-phrase social engineering</div>
+      <div class="m-row"><span class="m-def">Duress PW</span><span class="cell gap">Gap</span></div>
+      <div class="m-row"><span class="m-def">Geofence 2nd PW</span><span class="cell gap">Gap</span></div>
+      <div class="m-row"><span class="m-def">Time-lock</span><span class="cell gap">Gap</span></div>
+      <div class="m-row"><span class="m-def">Multi-sig</span><span class="cell gap">Gap</span></div>
+      <div class="m-row"><span class="m-def">App masking</span><span class="cell partial">Partial</span></div>
+      <div class="m-row"><span class="m-def">Panic-drain</span><span class="cell gap">Gap</span></div>
+    </div>
+    <div class="m-card">
+      <div class="m-hd">Mixer laundering</div>
+      <div class="m-row"><span class="m-def">Duress PW</span><span class="cell partial">Partial</span></div>
+      <div class="m-row"><span class="m-def">Geofence 2nd PW</span><span class="cell partial">Partial</span></div>
+      <div class="m-row"><span class="m-def">Time-lock</span><span class="cell covers">Covers</span></div>
+      <div class="m-row"><span class="m-def">Multi-sig</span><span class="cell covers">Covers</span></div>
+      <div class="m-row"><span class="m-def">App masking</span><span class="cell gap">Gap</span></div>
+      <div class="m-row"><span class="m-def">Panic-drain</span><span class="cell partial">Partial</span></div>
+    </div>
+    <div class="m-card">
+      <div class="m-hd">Coercion at home (inside fence)</div>
+      <div class="m-row"><span class="m-def">Duress PW</span><span class="cell covers">Covers</span></div>
+      <div class="m-row"><span class="m-def">Geofence 2nd PW</span><span class="cell gap">Gap</span></div>
+      <div class="m-row"><span class="m-def">Time-lock</span><span class="cell gap">Gap</span></div>
+      <div class="m-row"><span class="m-def">Multi-sig</span><span class="cell partial">Partial</span></div>
+      <div class="m-row"><span class="m-def">App masking</span><span class="cell partial">Partial</span></div>
+      <div class="m-row"><span class="m-def">Panic-drain</span><span class="cell partial">Partial</span></div>
+    </div>
+  </div>
+
+  <div class="legend">
+    <span><span class="cell covers">Covers</span> defense applies</span>
+    <span><span class="cell partial">Partial</span> helps but incomplete</span>
+    <span><span class="cell gap">Gap</span> uncovered / defeated</span>
+  </div>
+
+  <div class="callout c-red">
+    <div class="ico">🚨</div>
+    <div class="body"><strong>Biggest gaps:</strong> (1) attacker demands the “real” password after a believable decoy transfer — no green cells; (2) seed-phrase social engineering is largely out of band; (3) GPS spoofing can defeat geofence-gated rules; (4) coercion at home bypasses outside-fence brakes — rely on duress password + decoy calibration.</div>
+  </div>
+
+  <div class="callout c-purple">
+    <div class="ico">📎</div>
+    <div class="body"><strong>Part 2</strong> will cover onboarding screens (incl. simulation mode), in-practice conditional UI trees, open risks, phased next steps, and positioning vocabulary.</div>
+  </div>
+
+  <p class="footer-note">Duress-Aware Wallet Security Standard · Part 1 of 2 · Soft Notion-style reader · Not legal or investment advice</p>
+
+</div>
+</div>
+</body>
+</html>

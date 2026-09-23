@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Duress-Aware Wallet Security Standard — Part 2</title>
+<style>
+  :root {
+    --bg: #F7F6F3;
+    --paper: #FFFFFF;
+    --ink: #37352F;
+    --mute: #6B6A65;
+    --line: #E9E8E4;
+    --blue: #E7F0FD; --blue-ink: #1F4E9B; --blue-edge: #C5D9F7;
+    --amber: #FBF3DB; --amber-ink: #8A6A1A; --amber-edge: #F0E0A8;
+    --green: #E8F5E9; --green-ink: #1B6B3A; --green-edge: #BFDDBF;
+    --red: #FDECEC; --red-ink: #9B1C1C; --red-edge: #F3C1C1;
+    --purple: #F3EAFE; --purple-ink: #5B2B9E; --purple-edge: #DCC7F5;
+    --teal: #E6F7F4; --teal-ink: #0B6B5C;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font: 400 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 820px; margin: 0 auto; padding: 48px 28px 96px; }
+  .paper {
+    background: var(--paper); border-radius: 12px; padding: 56px 52px;
+    box-shadow: 0 1px 2px rgba(0,0,0,.04); border: 1px solid var(--line);
+  }
+.kicker { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--mute); font-weight: 600; margin: 0 0 12px; }
+  h1 { font-size: 36px; line-height: 1.2; letter-spacing: -.02em; font-weight: 700; margin: 0 0 12px; }
+  .tagline { font-size: 18px; color: var(--mute); margin: 0 0 8px; }
+  .meta { font-size: 13px; color: var(--mute); margin-top: 24px; }
+  hr.div { border: 0; border-top: 1px solid var(--line); margin: 40px 0; }
+  h2 { font-size: 24px; letter-spacing: -.01em; margin: 0 0 16px; font-weight: 700; }
+  h3 { font-size: 16px; margin: 28px 0 10px; font-weight: 700; }
+  p { margin: 0 0 14px; }
+  .callout {
+    border-radius: 8px; padding: 14px 16px; margin: 18px 0;
+    border: 1px solid transparent; display: flex; gap: 12px; align-items: flex-start;
+  }
+  .callout .ico { font-size: 18px; line-height: 1.4; flex: 0 0 auto; }
+  .callout .body { flex: 1; font-size: 15px; }
+  .callout .body strong { font-weight: 700; }
+  .c-blue { background: var(--blue); border-color: var(--blue-edge); color: var(--blue-ink); }
+  .c-amber { background: var(--amber); border-color: var(--amber-edge); color: var(--amber-ink); }
+  .c-green { background: var(--green); border-color: var(--green-edge); color: var(--green-ink); }
+  .c-red { background: var(--red); border-color: var(--red-edge); color: var(--red-ink); }
+  .c-purple { background: var(--purple); border-color: var(--purple-edge); color: var(--purple-ink); }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; margin: 16px 0 8px; }
+  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--mute); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; background: #FAFAF8; }
+  tr.rec td { background: var(--green); }
+  .feat {
+    border: 1px solid var(--line); border-radius: 10px; overflow: hidden; margin: 18px 0;
+  }
+  .feat .hd { padding: 10px 16px; font-weight: 700; font-size: 14px; letter-spacing: .02em; }
+  .feat .bd { padding: 14px 16px 16px; background: #fff; }
+  .hd-blue { background: var(--blue); color: var(--blue-ink); }
+  .hd-amber { background: var(--amber); color: var(--amber-ink); }
+  .hd-green { background: var(--green); color: var(--green-ink); }
+  .hd-purple { background: var(--purple); color: var(--purple-ink); }
+  .hd-red { background: var(--red); color: var(--red-ink); }
+  .hd-teal { background: var(--teal); color: var(--teal-ink); }
+  .flow {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 20px 0;
+    padding: 18px; background: #FAFAF8; border-radius: 10px; border: 1px dashed var(--line);
+  }
+  .chip {
+    background: #fff; border: 1px solid var(--line); border-radius: 8px;
+    padding: 8px 12px; font-size: 13px; font-weight: 600; color: var(--ink);
+  }
+  .chip.warn { background: var(--amber); border-color: var(--amber-edge); color: var(--amber-ink); }
+  .chip.bad { background: var(--red); border-color: var(--red-edge); color: var(--red-ink); }
+  .chip.ok { background: var(--green); border-color: var(--green-edge); color: var(--green-ink); }
+  .chip.safe { background: var(--blue); border-color: var(--blue-edge); color: var(--blue-ink); }
+  .arrow { color: var(--mute); font-weight: 700; }
+.cell { display: inline-block; min-width: 64px; padding: 4px 8px; border-radius: 6px; font-weight: 700; font-size: 11px; }
+  .covers { background: var(--green); color: var(--green-ink); }
+  .partial { background: var(--amber); color: var(--amber-ink); }
+  .gap { background: var(--red); color: var(--red-ink); }
+  .legend { display: flex; gap: 12px; flex-wrap: wrap; font-size: 13px; color: var(--mute); margin-top: 8px; }
+  .pill { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 700; }
+  .pill-rec { background: var(--green); color: var(--green-ink); }
+  ul { margin: 0 0 14px; padding-left: 20px; }
+  li { margin-bottom: 6px; }
+  .footer-note { font-size: 13px; color: var(--mute); margin-top: 32px; }
+
+  .screen-grid { display: grid; gap: 12px; margin: 16px 0; }
+  .screen {
+    border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: #fff;
+  }
+  .screen.sim { border-color: var(--purple-edge); box-shadow: 0 0 0 2px var(--purple); }
+  .screen .sh { padding: 10px 14px; font-weight: 700; font-size: 14px; background: #FAFAF8; border-bottom: 1px solid var(--line); display:flex; justify-content:space-between; align-items:center; gap:8px; }
+  .screen .sb { padding: 12px 14px; font-size: 14px; }
+  .screen .sb dt { font-weight: 700; color: var(--mute); font-size: 11px; text-transform: uppercase; letter-spacing: .04em; margin-top: 8px; }
+  .screen .sb dt:first-child { margin-top: 0; }
+  .screen .sb dd { margin: 2px 0 0; }
+  .sev { display:inline-block; font-size:11px; font-weight:700; padding:2px 8px; border-radius:999px; text-transform:uppercase; letter-spacing:.03em; }
+  .sev-h { background: var(--red); color: var(--red-ink); }
+  .sev-m { background: var(--amber); color: var(--amber-ink); }
+  .sev-l { background: var(--green); color: var(--green-ink); }
+  .tree {
+    background: #FAFAF8; border: 1px solid var(--line); border-radius: 10px;
+    padding: 14px 16px; margin: 12px 0; font-size: 13.5px; line-height: 1.55;
+  }
+  .tree .cond { font-weight: 700; color: var(--blue-ink); }
+  .tree .ui { font-weight: 600; }
+  .tree code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; background: #fff; padding: 1px 5px; border-radius: 4px; border: 1px solid var(--line); }
+  .roadmap { display: grid; gap: 10px; margin: 16px 0; }
+  .phase { display: flex; gap: 14px; align-items: flex-start; border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; background: #fff; }
+  .phase .n { flex: 0 0 36px; height: 36px; border-radius: 50%; background: var(--blue); color: var(--blue-ink); font-weight: 800; display: grid; place-items: center; }
+  .gloss dt { font-weight: 700; margin-top: 12px; }
+  .gloss dd { margin: 2px 0 0; color: var(--mute); }
+
+
+  img { max-width: 100%; height: auto; }
+  .table-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+    max-width: 100%;
+    margin: 16px 0 8px;
+    position: relative;
+  }
+  .table-scroll > table { margin-top: 0; margin-bottom: 0; }
+  .table-hint {
+    display: none;
+    font-size: 12px;
+    color: var(--mute);
+    margin: 0 0 6px;
+    font-weight: 600;
+  }
+  .matrix {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+    max-width: 100%;
+    margin: 16px 0;
+  }
+  .matrix table { min-width: 720px; font-size: 12px; }
+  .matrix th, .matrix td { text-align: center; padding: 8px 6px; }
+  .matrix th:first-child,
+  .matrix td:first-child {
+    text-align: left;
+    min-width: 140px;
+    position: sticky;
+    left: 0;
+    z-index: 2;
+    box-shadow: 2px 0 6px -2px rgba(0,0,0,.14);
+  }
+  .matrix th:first-child { background: #FAFAF8; }
+  .matrix td:first-child { background: #fff; z-index: 1; }
+  .matrix-cards { display: none; margin: 16px 0; }
+  .m-card {
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 0 0 12px;
+    background: #fff;
+  }
+  .m-card .m-hd {
+    padding: 12px 14px;
+    font-weight: 700;
+    font-size: 14px;
+    background: #FAFAF8;
+    border-bottom: 1px solid var(--line);
+  }
+  .m-card .m-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--line);
+    font-size: 13px;
+  }
+  .m-card .m-row:last-child { border-bottom: 0; }
+  .m-card .m-def { color: var(--ink); flex: 1; min-width: 0; overflow-wrap: anywhere; }
+  .m-card .cell { flex: 0 0 auto; min-width: 56px; text-align: center; }
+  body {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  @media (max-width: 640px) {
+    .wrap { padding: 16px 10px calc(48px + env(safe-area-inset-bottom, 0px)); }
+    .paper { padding: 24px 16px; border-radius: 10px; }
+    h1 { font-size: 24px; line-height: 1.25; }
+    h2 { font-size: 19px; }
+    .tagline { font-size: 16px; }
+    hr.div { margin: 28px 0; }
+    th, td {
+      padding: 8px 10px;
+      word-break: break-word;
+      overflow-wrap: anywhere;
+    }
+    table { font-size: 13px; }
+    .table-hint { display: block; }
+    .flow { padding: 14px; gap: 6px; }
+    .arrow { display: none; }
+    .chip { font-size: 12px; padding: 7px 10px; }
+    .matrix { display: none; }
+    .matrix-cards { display: block; }
+    .callout { padding: 12px 14px; }
+    .feat .bd { padding: 12px 14px 14px; }
+    .feat { overflow: visible; }
+  }
+  @media (max-width: 480px) {
+    .wrap { padding: 12px 8px calc(40px + env(safe-area-inset-bottom, 0px)); }
+    .paper { padding: 20px 14px; }
+    h1 { font-size: 22px; }
+    h2 { font-size: 18px; }
+    th, td { padding: 7px 8px; }
+    .cell { min-width: 52px; font-size: 10px; padding: 3px 6px; }
+  }
+
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="paper">
+
+  <p class="kicker" style="margin-bottom:8px"><a href="index.html" style="color:inherit;text-decoration:none">← Proposal home</a></p>
+
+  <p class="kicker">Feature proposal · Part 2 of 2</p>
+  <h1>Duress-Aware Wallet Security Standard</h1>
+  <p class="tagline">Onboarding, runtime flows, positioning, risks, roadmap, and glossary — same palette as Part 1.</p>
+  <p class="meta">Continues from Part 1 · For engineers &amp; partners · Editable working draft</p>
+
+  <div class="callout c-blue">
+    <div class="ico">📎</div>
+    <div class="body"><strong>Companion to Part 1.</strong> Threat matrix, decoy calibration, and multi-sig model scores live there. This part is the product path: how users set it up, what the UI does under stress, and how partners should talk about it.</div>
+  </div>
+
+  <hr class="div"/>
+
+  <!-- 8 Onboarding -->
+  <h2>8. Onboarding flow</h2>
+  <p>Nine screens, left to right. Simulation is mandatory before Done — and recommended again on a quarterly drill.</p>
+  <div class="flow" aria-label="Onboarding path">
+    <span class="chip">1 Welcome</span><span class="arrow">→</span>
+    <span class="chip">2 Geofence</span><span class="arrow">→</span>
+    <span class="chip">3 Decoy tier</span><span class="arrow">→</span>
+    <span class="chip">4 Duress PW</span><span class="arrow">→</span>
+    <span class="chip">5 Approver</span><span class="arrow">→</span>
+    <span class="chip">6 Threshold</span><span class="arrow">→</span>
+    <span class="chip">7 Masking</span><span class="arrow">→</span>
+    <span class="chip" style="background:var(--purple);border-color:var(--purple-edge);color:var(--purple-ink)">8 Simulation</span><span class="arrow">→</span>
+    <span class="chip ok">9 Done</span>
+  </div>
+
+  <div class="screen-grid">
+
+    <div class="screen">
+      <div class="sh"><span>1 · Welcome / education</span></div>
+      <div class="sb">
+        <dl>
+          <dt>Sees</dt><dd>Plain contrast: banks have limits; wallets often don’t. Coercion as a first-class threat.</dd>
+          <dt>Inputs</dt><dd>Continue · Not now</dd>
+          <dt>Education</dt><dd>“This adds a decoy vault and a slow-lane for big sends. It does not hide you from the chain.”</dd>
+        </dl>
+      </div>
+    </div>
+
+    <div class="screen">
+      <div class="sh"><span>2 · Set home geofence</span></div>
+      <div class="sb">
+        <dl>
+          <dt>Sees</dt><dd>Map + radius slider; optional second trusted place.</dd>
+          <dt>Inputs</dt><dd>Pin home; set radius (e.g. 200m–2km)</dd>
+          <dt>Education</dt><dd>“Outside this zone, Face ID alone won’t open your real vault.”</dd>
+        </dl>
+      </div>
+    </div>
+
+    <div class="screen">
+      <div class="sh"><span>3 · Choose decoy tier</span></div>
+      <div class="sb">
+        <dl>
+          <dt>Sees</dt><dd>Quiet / Moderate / High-profile cards with USD bands from Part 1.</dd>
+          <dt>Inputs</dt><dd>Pick tier; optional custom within band</dd>
+          <dt>Education</dt><dd>“Pick what looks believable for you. Too small can backfire.”</dd>
+        </dl>
+      </div>
+    </div>
+
+    <div class="screen">
+      <div class="sh"><span>4 · Set duress password</span></div>
+      <div class="sb">
+        <dl>
+          <dt>Sees</dt><dd>Two fields + strength meter; never side-by-side with primary password.</dd>
+          <dt>Inputs</dt><dd>Set / confirm duress password</dd>
+          <dt>Education</dt><dd>“Same username. This password opens only the decoy. Practice it.”</dd>
+        </dl>
+      </div>
+    </div>
+
+    <div class="screen">
+      <div class="sh"><span>5 · Choose approver model</span></div>
+      <div class="sb">
+        <dl>
+          <dt>Sees</dt><dd>Cards for person+distance, service, hybrid, rotating, delayed-self — with Safety/Ease chips.</dd>
+          <dt>Inputs</dt><dd>Choose model; enroll contacts or connect service</dd>
+          <dt>Education</dt><dd>“Who (or what) must bless large sends when you’re away from home?”</dd>
+        </dl>
+      </div>
+    </div>
+
+    <div class="screen">
+      <div class="sh"><span>6 · Transfer threshold</span></div>
+      <div class="sb">
+        <dl>
+          <dt>Sees</dt><dd>Amount slider + time-lock preview.</dd>
+          <dt>Inputs</dt><dd>Threshold (e.g. $1,000) + lock length</dd>
+          <dt>Education</dt><dd>“Above this, outside the fence: delay and/or approval.”</dd>
+        </dl>
+      </div>
+    </div>
+
+    <div class="screen">
+      <div class="sh"><span>7 · App-masking option</span></div>
+      <div class="sb">
+        <dl>
+          <dt>Sees</dt><dd>Preview of mundane shell (gym tracker) vs real UI.</dd>
+          <dt>Inputs</dt><dd>Enable/disable; set reveal code / gesture</dd>
+          <dt>Education</dt><dd>“Masking must survive notifications and Face ID sheets — not just the icon.”</dd>
+        </dl>
+      </div>
+    </div>
+
+    <div class="screen sim">
+      <div class="sh"><span>8 · Simulation mode</span><span class="pill" style="background:var(--purple);color:var(--purple-ink)">Highlighted</span></div>
+      <div class="sb">
+        <dl>
+          <dt>Sees</dt><dd>Safe sandbox walkthrough. Badge on every step: <strong>SIMULATION · NO FUNDS MOVE</strong>.</dd>
+          <dt>Inputs</dt><dd>Run scenario; pass/fail checklist</dd>
+          <dt>Education</dt><dd>“Practice once. Enter the wrong password on purpose. See the decoy. Cancel freely.”</dd>
+          <dt>Script</dt><dd>(1) pretend GPS = outside → (2) Face ID OK → (3) duress PW → decoy → (4) &gt;threshold send → time-lock/approver toast → (5) logout → primary PW → real vault.</dd>
+        </dl>
+        <div class="callout c-purple" style="margin:12px 0 0">
+          <div class="ico">🔁</div>
+          <div class="body"><strong>Quarterly drill (recommended).</strong> Re-run Simulation every ~90 days to catch a stale geofence pin, a departed approver, or a forgotten duress password — before a real night needs them.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen">
+      <div class="sh"><span>9 · Done</span></div>
+      <div class="sb">
+        <dl>
+          <dt>Sees</dt><dd>Summary of choices; settings link; optional invite to trusted contact.</dd>
+          <dt>Inputs</dt><dd>Finish · Invite approver · Schedule drill reminder</dd>
+          <dt>Education</dt><dd>“You can change these later. After a real duress use, rotate passwords from a safe place.”</dd>
+        </dl>
+      </div>
+    </div>
+
+  </div>
+
+  <hr class="div"/>
+
+  <!-- 9 Flows -->
+  <h2>9. In-practice flow trees</h2>
+  <p>Each branch: <span class="cond">condition</span> → <strong>UI state</strong> → next. Amber flags mark where users get stuck or confused.</p>
+
+  <h3>(a) Home · normal login → real vault</h3>
+  <div class="tree">
+    <span class="cond">IF</span> inside geofence <strong>AND</strong> biometric OK <strong>AND</strong> (no PW required OR primary PW)<br/>
+    → <span class="ui">UI:</span> Real vault home (true balances)<br/>
+    → <span class="ui">NEXT:</span> normal send / card spend
+  </div>
+  <div class="callout c-amber"><div class="ico">⚠️</div><div class="body"><strong>Stuck risk:</strong> user forgot they enabled “always ask password even at home.”</div></div>
+
+  <h3>(b) Outside · Face ID · original password → real vault + brakes</h3>
+  <div class="tree">
+    <span class="cond">IF</span> outside geofence <strong>AND</strong> biometric OK<br/>
+    → <span class="ui">UI:</span> Secondary password sheet (no vault hint)<br/>
+    <span class="cond">IF</span> password == primary<br/>
+    → <span class="ui">UI:</span> Real vault<br/>
+    → <span class="ui">NEXT:</span> sends ≥ threshold enter time-lock and/or approver queue
+  </div>
+  <div class="callout c-amber"><div class="ico">⚠️</div><div class="body"><strong>Stuck risk:</strong> user thinks Face ID failed. Copy must say “password required away from home.”</div></div>
+
+  <h3>(c) Outside · Face ID · decoy password → decoy vault</h3>
+  <div class="tree">
+    <span class="cond">IF</span> outside geofence <strong>AND</strong> biometric OK <strong>AND</strong> password == duress<br/>
+    → <span class="ui">UI:</span> Decoy vault (calibrated balance, plausible history)<br/>
+    → <span class="ui">NEXT:</span> decoy sends look instant; hide real-vault time-lock chrome (avoid a tell)
+  </div>
+  <div class="callout c-amber"><div class="ico">⚠️</div><div class="body"><strong>Stuck risk:</strong> real-vault notifications leaking. Suppress or rewrite while a decoy session is active.</div></div>
+
+  <h3>(d) Transfer above threshold · outside geofence</h3>
+  <div class="tree">
+    <span class="cond">IF</span> real vault <strong>AND</strong> outside fence <strong>AND</strong> amount ≥ threshold<br/>
+    → <span class="ui">UI:</span> “Pending · unlocks in 24h” + Approver notified<br/>
+    → <span class="ui">NEXT:</span> wait · cancel · optional speed-up via second factor
+  </div>
+  <div class="callout c-amber"><div class="ico">⚠️</div><div class="body"><strong>Stuck risk:</strong> urgent legitimate pay (rent, medical). Show clear cancel + path to adjust threshold later — never a silent infinite wait.</div></div>
+
+  <h3>(e) Approver unreachable → fallback</h3>
+  <div class="tree">
+    <span class="cond">IF</span> approval pending <strong>AND</strong> approver timeout<br/>
+    → <span class="ui">UI:</span> Fallback banner<br/>
+    → hybrid → escalate to service · person-only → extend lock / try next enrolled contact · delayed-self → continue countdown
+  </div>
+  <div class="callout c-amber"><div class="ico">⚠️</div><div class="body"><strong>Stuck risk:</strong> silent failure. Always show countdown + who was pinged — without revealing that a decoy mode exists.</div></div>
+
+  <h3>(f) Panic-drain trigger</h3>
+  <div class="tree">
+    <span class="cond">IF</span> panic gesture/code entered (optional)<br/>
+    → <span class="ui">UI:</span> brief confirm (or zero-confirm if configured for true emergency)<br/>
+    → <span class="ui">NEXT:</span> move real hot funds to pre-set cold/burner path; decoy session may continue for cover
+  </div>
+  <div class="callout c-amber"><div class="ico">⚠️</div><div class="body"><strong>Stuck risk:</strong> mistype under stress. Require Simulation rehearsal; treat as irreversible without a recovery ceremony.</div></div>
+
+  <h3>(g) App masking · wrong reveal code</h3>
+  <div class="tree">
+    <span class="cond">IF</span> masking ON <strong>AND</strong> launch/reveal code wrong<br/>
+    → <span class="ui">UI:</span> Mundane app (gym tracker / notes) — full interaction<br/>
+    → <span class="ui">NEXT:</span> no wallet chrome, no crypto notifications
+  </div>
+  <div class="callout c-amber"><div class="ico">⚠️</div><div class="body"><strong>Stuck risk:</strong> forgotten reveal code. Recovery must not show “Forgot wallet password?” on the disguise shell.</div></div>
+
+  <div class="callout c-blue">
+    <div class="ico">🗺️</div>
+    <div class="body"><strong>Quick tree:</strong> Launch → (masking wrong → mundane) else → inside fence → real vault; outside → Face ID → password sheet → primary (real + brakes) / duress (decoy) / panic code (drain + optional cover).</div>
+  </div>
+
+  <hr class="div"/>
+
+  <!-- 10 Positioning -->
+  <h2>10. Positioning</h2>
+  <p>Ship this as an <strong>adoptable feature layer</strong>, not one mandatory UI or one shared secret scheme. Uniform behavior across every wallet is predictable — and therefore attackable.</p>
+  <div class="callout c-green">
+    <div class="ico">🧩</div>
+    <div class="body"><strong>Fragmentation aids security.</strong> Different decoy defaults, prompt copy, and threshold UIs raise the cost of a rehearsed attack script. Partners share a vocabulary; they do not freeze into one monoculture.</div>
+  </div>
+  <h3>Minimal common vocabulary</h3>
+  <div class="table-scroll" role="region" aria-label="Minimal common vocabulary" tabindex="0">
+  <p class="table-hint">Swipe for more →</p>
+  <table>
+    <thead><tr><th>Term</th><th>Meaning</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Duress password</strong></td><td>Credential that opens the decoy vault for the same identity</td></tr>
+      <tr><td><strong>Geofence policy</strong></td><td>Trusted locations + rules when outside them</td></tr>
+      <tr><td><strong>Transfer threshold</strong></td><td>Amount above which cool-down / multi-sig applies</td></tr>
+      <tr><td><strong>Multi-sig hook</strong></td><td>Interface to request approval from a trusted contact or co-signer service</td></tr>
+    </tbody>
+  </table>
+</div>
+
+  <hr class="div"/>
+
+  <!-- 11 Risks -->
+  <h2>11. Open risks</h2>
+  <ul>
+    <li><span class="sev sev-h">High</span> <strong>Demand real password after decoy transfer</strong> — no control cell covers this; calibration + training only.</li>
+    <li><span class="sev sev-h">High</span> <strong>GPS / location spoofing</strong> — can skip outside-fence rules; need integrity or fail-closed.</li>
+    <li><span class="sev sev-h">High</span> <strong>Coercion at home</strong> — geofence brakes don’t fire; duress password + believable decoy carry the load.</li>
+    <li><span class="sev sev-h">High</span> <strong>Seed-phrase social engineering</strong> — mostly out of band for this feature layer.</li>
+    <li><span class="sev sev-m">Medium</span> <strong>Decoy-amount mis-calibration</strong> — too small invites escalation; too large is real loss.</li>
+    <li><span class="sev sev-m">Medium</span> <strong>Approver / multi-sig custody</strong> — new social-engineering and outage surfaces.</li>
+    <li><span class="sev sev-m">Medium</span> <strong>Notification &amp; metadata leaks</strong> — widgets, email, chain analytics can betray the real vault.</li>
+    <li><span class="sev sev-m">Medium</span> <strong>AML / KYC perception</strong> — masking + duress can look like evasion; frame as personal safety, distinct from mixer semantics.</li>
+    <li><span class="sev sev-l">Low</span> <strong>Recovery after duress use</strong> — solvable with a safe rotate ceremony; easy to rush or skip.</li>
+    <li><span class="sev sev-l">Low</span> <strong>Panic-drain mistype</strong> — rare if optional + rehearsed; severe if not.</li>
+  </ul>
+
+  <hr class="div"/>
+
+  <!-- 12 Roadmap -->
+  <h2>12. Phased roadmap</h2>
+  <div class="roadmap">
+    <div class="phase"><div class="n">1</div><div><strong>Spec + threat model</strong><br/><span style="color:var(--mute);font-size:14px">Formalize vault separation, geofence policy object, threshold / time-lock semantics, coercion scenarios (home vs away).</span></div></div>
+    <div class="phase"><div class="n">2</div><div><strong>Reference-wallet prototype</strong><br/><span style="color:var(--mute);font-size:14px">One open reference: duress password, decoy vault, geofence gate, masked UI shell, Simulation mode.</span></div></div>
+    <div class="phase"><div class="n">3</div><div><strong>Neobank / card pilot</strong><br/><span style="color:var(--mute);font-size:14px">Partner with a spend rail (RedotPay-pattern) and/or self-custody product (EtherFi-pattern) on real send flows.</span></div></div>
+    <div class="phase"><div class="n">4</div><div><strong>Publish vocabulary</strong><br/><span style="color:var(--mute);font-size:14px">Release the four terms; keep UI and defaults plural across adopters.</span></div></div>
+  </div>
+
+  <hr class="div"/>
+
+  <!-- 13 Glossary -->
+  <h2>13. Appendix · Glossary</h2>
+  <dl class="gloss">
+    <dt>Decoy vault</dt><dd>Isolated balance and history opened by the duress password; must not unlock real vault keys.</dd>
+    <dt>Duress password</dt><dd>Second credential for the same username that opens the decoy vault.</dd>
+    <dt>Geofence policy</dt><dd>Set of trusted places and the rules that apply when the device is outside them.</dd>
+    <dt>Transfer threshold</dt><dd>Amount above which time-lock and/or multi-sig approval is required (illustrative default $1,000 outside the fence).</dd>
+    <dt>Multi-sig hook</dt><dd>Integration point to a human co-signer, rotating list, or third-party policy service.</dd>
+    <dt>App masking</dt><dd>Full-interaction disguise as a mundane app until a reveal code opens wallet UI.</dd>
+    <dt>Panic-drain</dt><dd>Optional third secret that moves real hot funds to a pre-set burner / deep cold path.</dd>
+    <dt>Simulation mode</dt><dd>Onboarding (and quarterly) rehearsal where no real funds move.</dd>
+    <dt>Time-lock</dt><dd>Mandatory delay before an above-threshold transfer can broadcast.</dd>
+    <dt>Feature layer</dt><dd>Adoptable kit of behaviors and vocabulary — not a single rigid standard UI.</dd>
+  </dl>
+
+  <div class="callout c-purple" style="margin-top:28px">
+    <div class="ico">✅</div>
+    <div class="body"><strong>End of Part 2.</strong> Together with Part 1 this is the full Notion-styled reader: problem → solution → features → threat matrix → onboarding → runtime trees → positioning → risks → roadmap → glossary.</div>
+  </div>
+
+  <p class="footer-note">Duress-Aware Wallet Security Standard · Part 2 of 2 · Soft Notion-style reader · Not legal or investment advice</p>
+
+</div>
+</div>
+</body>
+</html>
