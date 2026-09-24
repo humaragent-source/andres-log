@@ -1,0 +1,1332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
+<title>Interactive Demo — Duress-Aware Wallet Security Standard</title>
+<meta name="description" content="Conceptual interactive walkthrough of onboarding, coercion flows, threat matrix, and decoy calibration. No funds. No real keys."/>
+<style>
+:root {
+  --bg: #F7F6F3;
+  --paper: #FFFFFF;
+  --ink: #37352F;
+  --mute: #6B6A65;
+  --line: #E9E8E4;
+  --blue: #E7F0FD; --blue-ink: #1F4E9B; --blue-edge: #C5D9F7;
+  --amber: #FBF3DB; --amber-ink: #8A6A1A; --amber-edge: #F0E0A8;
+  --green: #E8F5E9; --green-ink: #1B6B3A; --green-edge: #BFDDBF;
+  --red: #FDECEC; --red-ink: #9B1C1C; --red-edge: #F3C1C1;
+  --purple: #F3EAFE; --purple-ink: #5B2B9E; --purple-edge: #DCC7F5;
+  --teal: #E6F7F4; --teal-ink: #0B6B5C;
+  --panel-w: 380px;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; overflow: hidden; background: var(--bg); color: var(--ink);
+  font: 400 14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased; }
+button { font: inherit; cursor: pointer; }
+a { color: var(--blue-ink); }
+
+/* Top chrome */
+.chrome {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 40;
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  padding: 10px 14px; background: rgba(247,246,243,.92); backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--line);
+}
+.chrome .back {
+  font-size: 13px; font-weight: 600; text-decoration: none; color: var(--blue-ink);
+  padding: 6px 10px; border-radius: 8px; border: 1px solid var(--line); background: #fff;
+}
+.chrome .back:hover { border-color: var(--blue-edge); }
+.chrome .title { font-weight: 700; font-size: 14px; letter-spacing: -.01em; }
+.chrome .tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-left: auto; }
+.chrome .tabs button {
+  border: 1px solid var(--line); background: #fff; color: var(--ink);
+  border-radius: 999px; padding: 5px 12px; font-size: 12px; font-weight: 600;
+}
+.chrome .tabs button:hover, .chrome .tabs button:focus-visible { border-color: var(--blue-edge); outline: none; }
+.chrome .tabs button.active { background: var(--blue); color: var(--blue-ink); border-color: var(--blue-edge); }
+
+.badge {
+  position: fixed; top: 58px; left: 50%; transform: translateX(-50%); z-index: 45;
+  background: var(--amber); color: var(--amber-ink); border: 1px solid var(--amber-edge);
+  font-size: 11px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase;
+  padding: 6px 14px; border-radius: 999px; white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(0,0,0,.06); pointer-events: none;
+}
+
+/* Viewport + world */
+.viewport {
+  position: fixed; inset: 0; top: 52px; overflow: hidden; cursor: grab;
+  background:
+    radial-gradient(circle at 1px 1px, #E3E2DE 1px, transparent 0) 0 0 / 24px 24px,
+    var(--bg);
+  touch-action: none;
+}
+.viewport.panning { cursor: grabbing; }
+.viewport.panel-open { right: var(--panel-w); }
+.world {
+  position: absolute; left: 0; top: 0; width: 4200px; height: 4000px;
+  transform-origin: 0 0; will-change: transform;
+}
+
+/* Boards */
+.board {
+  position: absolute; background: var(--paper); border: 1px solid var(--line);
+  border-radius: 16px; padding: 28px 28px 32px;
+  box-shadow: 0 4px 24px rgba(0,0,0,.04);
+}
+.board-label {
+  font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--mute); margin: 0 0 6px;
+}
+.board h2 { margin: 0 0 6px; font-size: 22px; letter-spacing: -.02em; }
+.board .sub { margin: 0 0 20px; color: var(--mute); font-size: 13px; max-width: 720px; }
+
+#board-onboarding { left: 80px; top: 100px; width: 2680px; }
+#board-flows { left: 80px; top: 720px; width: 1180px; min-height: 980px; }
+#board-matrix { left: 1340px; top: 720px; width: 1420px; min-height: 980px; }
+#board-calib { left: 80px; top: 1820px; width: 2680px; min-height: 520px; }
+#board-story { left: 80px; top: 2500px; width: 2680px; min-height: 780px; }
+
+/* Board E — location story */
+.story-toolbar {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin: 0 0 16px;
+}
+.story-toggle {
+  border: 1.5px solid var(--green-edge); background: var(--green); color: var(--green-ink);
+  border-radius: 999px; padding: 10px 18px; font-size: 13px; font-weight: 800;
+  letter-spacing: .01em; transition: background .2s, border-color .2s, color .2s, box-shadow .2s;
+}
+.story-toggle:hover, .story-toggle:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(27,107,58,.18); }
+.story-toggle.off {
+  background: #FAFAF8; color: var(--mute); border-color: var(--line);
+}
+.story-status {
+  font-size: 12px; font-weight: 700; color: var(--mute);
+  padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line); background: #fff;
+}
+.story-status.armed { color: var(--green-ink); background: var(--green); border-color: var(--green-edge); }
+.story-status.outside { color: var(--amber-ink); background: var(--amber); border-color: var(--amber-edge); }
+.story-caption {
+  margin: 0 0 16px; padding: 12px 14px; border-radius: 10px;
+  background: var(--blue); border: 1px solid var(--blue-edge); color: var(--blue-ink);
+  font-size: 13px; font-weight: 600; max-width: 720px;
+}
+.story-stage {
+  display: grid; grid-template-columns: 1.35fr 1fr; gap: 20px; align-items: stretch;
+}
+@media (max-width: 900px) {
+  .story-stage { grid-template-columns: 1fr; }
+}
+.story-map-wrap {
+  position: relative; border: 1px solid var(--line); border-radius: 14px;
+  background: #F0EFEC; overflow: hidden; min-height: 360px; height: 420px;
+}
+.story-map {
+  position: absolute; inset: 0;
+  background:
+    linear-gradient(90deg, transparent 49.5%, rgba(0,0,0,.04) 49.5% 50.5%, transparent 50.5%),
+    linear-gradient(0deg, transparent 49.5%, rgba(0,0,0,.04) 49.5% 50.5%, transparent 50.5%),
+    radial-gradient(ellipse at 30% 55%, #E8E6E0 0%, #F0EFEC 55%);
+  background-size: 48px 48px, 48px 48px, 100% 100%;
+}
+.story-home {
+  position: absolute; left: 18%; top: 28%; width: 38%; height: 52%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(27,107,58,.22) 0%, rgba(27,107,58,.10) 55%, rgba(27,107,58,.03) 75%, transparent 76%);
+  border: 2px dashed var(--green-edge);
+  transition: background .45s ease, border-color .45s ease, box-shadow .45s ease;
+}
+.story-map-wrap.outside-armed .story-home {
+  background: radial-gradient(circle, rgba(27,107,58,.10) 0%, rgba(27,107,58,.04) 55%, transparent 76%);
+  border-color: rgba(27,107,58,.35);
+}
+.story-home-label {
+  position: absolute; left: 50%; top: 46%; transform: translate(-50%, -50%);
+  font-size: 11px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase;
+  color: var(--green-ink); background: rgba(232,245,233,.92); padding: 4px 10px;
+  border-radius: 999px; border: 1px solid var(--green-edge); white-space: nowrap;
+  pointer-events: none;
+}
+.story-pin {
+  position: absolute; left: 34%; top: 48%; width: 14px; height: 14px;
+  margin: -7px 0 0 -7px; border-radius: 50%; background: var(--green-ink);
+  box-shadow: 0 0 0 4px rgba(27,107,58,.2); z-index: 2;
+}
+.story-guide {
+  position: absolute; left: 34%; top: 48%; width: 22px; height: 22px;
+  margin: -11px 0 0 -11px; border-radius: 50%;
+  background: var(--blue-ink); border: 3px solid #fff;
+  box-shadow: 0 2px 8px rgba(31,78,155,.35), 0 0 0 6px rgba(31,78,155,.12);
+  z-index: 3; will-change: left, top;
+  transition: background .3s ease;
+}
+.story-guide::after {
+  content: ""; position: absolute; left: 50%; bottom: -10px; transform: translateX(-50%);
+  width: 2px; height: 8px; background: rgba(55,53,47,.25); border-radius: 1px;
+}
+.story-guide.outside { background: var(--amber-ink); box-shadow: 0 2px 8px rgba(138,106,26,.35), 0 0 0 6px rgba(138,106,26,.14); }
+.story-path-hint {
+  position: absolute; left: 34%; top: 48%; width: 48%; height: 2px;
+  background: repeating-linear-gradient(90deg, var(--mute) 0 6px, transparent 6px 12px);
+  opacity: .35; transform-origin: left center; transform: rotate(18deg); pointer-events: none;
+}
+.story-zone-tag {
+  position: absolute; right: 12px; top: 12px; z-index: 4;
+  font-size: 11px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase;
+  padding: 6px 10px; border-radius: 8px; background: var(--green); color: var(--green-ink);
+  border: 1px solid var(--green-edge);
+}
+.story-map-wrap.outside-armed .story-zone-tag,
+.story-map-wrap.outside-off .story-zone-tag {
+  background: var(--amber); color: var(--amber-ink); border-color: var(--amber-edge);
+}
+.story-wallets {
+  display: flex; flex-direction: column; gap: 12px;
+}
+.wallet-card {
+  position: relative; border: 1.5px solid var(--line); border-radius: 14px;
+  padding: 16px 16px 14px; background: #fff; cursor: pointer; text-align: left; width: 100%; transition:
+    border-color .35s ease, background .35s ease, opacity .35s ease, box-shadow .35s ease, filter .35s ease;
+}
+.wallet-card .wk { font-size: 10px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--mute); }
+.wallet-card .wt { font-size: 16px; font-weight: 800; margin: 2px 0 6px; letter-spacing: -.01em; }
+.wallet-card .wb { font-size: 22px; font-weight: 800; letter-spacing: -.02em; }
+.wallet-card .ws {
+  display: inline-block; margin-top: 8px; font-size: 11px; font-weight: 800;
+  padding: 3px 8px; border-radius: 999px; border: 1px solid var(--line); color: var(--mute); background: #FAFAF8;
+}
+.wallet-card.real .wb { color: var(--blue-ink); }
+.wallet-card.decoy .wb { color: var(--purple-ink); }
+.wallet-card.active-session {
+  border-color: var(--green-edge); background: linear-gradient(#fff, var(--green));
+  box-shadow: 0 0 0 3px rgba(27,107,58,.12);
+}
+.wallet-card.active-session .ws { background: var(--green); color: var(--green-ink); border-color: var(--green-edge); }
+.wallet-card.locked {
+  opacity: .72; filter: grayscale(.35);
+  border-color: var(--red-edge); background: linear-gradient(#fff, var(--red));
+}
+.wallet-card.locked .ws { background: var(--red); color: var(--red-ink); border-color: var(--red-edge); }
+.wallet-card.inactive .ws { background: #FAFAF8; color: var(--mute); }
+.wallet-card .lock-ico {
+  position: absolute; right: 14px; top: 14px; width: 28px; height: 28px;
+  border-radius: 8px; display: flex; align-items: center; justify-content: center;
+  font-size: 14px; background: #FAFAF8; border: 1px solid var(--line); color: var(--mute);
+  transition: background .3s, color .3s, border-color .3s, transform .35s;
+}
+.wallet-card.locked .lock-ico {
+  background: var(--red); color: var(--red-ink); border-color: var(--red-edge);
+  transform: scale(1.05);
+}
+.wallet-card.active-session .lock-ico {
+  background: var(--green); color: var(--green-ink); border-color: var(--green-edge);
+}
+.lock-row {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 4px;
+}
+.lock-slot {
+  border: 1px dashed var(--line); border-radius: 10px; padding: 10px 8px; text-align: center;
+  font-size: 11px; font-weight: 700; color: var(--mute); background: #FAFAF8;
+  transition: background .35s, border-color .35s, color .35s, opacity .35s;
+}
+.lock-slot .ls-t { display: block; font-size: 10px; letter-spacing: .04em; text-transform: uppercase; margin-bottom: 4px; }
+.lock-slot.locked {
+  background: var(--red); border-color: var(--red-edge); color: var(--red-ink); border-style: solid;
+}
+.lock-slot.open {
+  background: var(--green); border-color: var(--green-edge); color: var(--green-ink); border-style: solid;
+}
+.story-foot {
+  margin-top: 16px; font-size: 12px; color: var(--mute); max-width: 900px;
+}
+
+/* Nodes */
+.node {
+  position: relative; display: inline-flex; flex-direction: column; gap: 6px;
+  background: #fff; border: 1.5px solid var(--line); border-radius: 12px;
+  padding: 14px 16px; min-width: 168px; max-width: 220px; text-align: left;
+  cursor: pointer; transition: border-color .15s, box-shadow .15s, transform .12s;
+  color: inherit; font: inherit;
+}
+.node:hover, .node:focus-visible {
+  border-color: var(--blue-edge); box-shadow: 0 4px 14px rgba(31,78,155,.12);
+  outline: none; transform: translateY(-1px);
+}
+.node.active { border-color: var(--blue-ink); box-shadow: 0 0 0 3px var(--blue); }
+.node .n-kicker { font-size: 10px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--mute); }
+.node .n-title { font-size: 14px; font-weight: 700; letter-spacing: -.01em; }
+.node .n-snip { font-size: 12px; color: var(--mute); line-height: 1.4; }
+.node.rec { border-color: var(--green-edge); background: linear-gradient(#fff, var(--green)); }
+.node.warn { border-color: var(--amber-edge); }
+.node.danger { border-color: var(--red-edge); }
+.node.purple { border-color: var(--purple-edge); background: linear-gradient(#fff, var(--purple)); }
+
+.flow-row {
+  display: flex; align-items: stretch; gap: 0; flex-wrap: nowrap;
+}
+.flow-row .node { flex: 0 0 auto; }
+.connector {
+  display: flex; align-items: center; justify-content: center;
+  width: 36px; color: var(--mute); font-weight: 700; font-size: 16px; flex: 0 0 auto;
+  align-self: center;
+}
+.connector::before { content: "→"; }
+
+/* Decision tree layout */
+.tree {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 14px;
+}
+.tree .node { max-width: none; width: 100%; min-width: 0; }
+.tree .span2 { grid-column: 1 / -1; }
+.tree-overview {
+  margin-bottom: 16px; padding: 14px 16px; background: #FAFAF8;
+  border: 1px dashed var(--line); border-radius: 12px; font-size: 12px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace; line-height: 1.55; color: var(--mute);
+  white-space: pre-wrap;
+}
+
+/* Matrix grid */
+.mx {
+  display: grid;
+  grid-template-columns: 180px repeat(6, 1fr);
+  gap: 4px; font-size: 11px;
+}
+.mx .corner, .mx .colh, .mx .rowh {
+  padding: 8px 6px; font-weight: 700; color: var(--mute); text-align: center;
+  font-size: 10px; letter-spacing: .02em; text-transform: uppercase;
+}
+.mx .rowh { text-align: left; text-transform: none; letter-spacing: 0; font-size: 12px; color: var(--ink); align-self: center; }
+.mx .colh { background: #FAFAF8; border-radius: 6px; }
+.mx-cell {
+  border: none; border-radius: 8px; padding: 10px 4px; font-weight: 800; font-size: 11px;
+  letter-spacing: .02em; cursor: pointer; transition: transform .1s, box-shadow .1s;
+}
+.mx-cell:hover, .mx-cell:focus-visible { outline: none; transform: scale(1.04); box-shadow: 0 2px 8px rgba(0,0,0,.1); }
+.mx-cell.active { box-shadow: 0 0 0 3px var(--blue-ink); }
+.st-covers { background: var(--green); color: var(--green-ink); }
+.st-partial { background: var(--amber); color: var(--amber-ink); }
+.st-gap { background: var(--red); color: var(--red-ink); }
+.legend { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 14px; font-size: 12px; color: var(--mute); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend i { width: 14px; height: 14px; border-radius: 4px; display: inline-block; }
+
+/* Calibration */
+.calib-scale {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 8px;
+}
+.tier {
+  border: 1.5px solid var(--line); border-radius: 14px; padding: 18px; background: #fff;
+  cursor: pointer; text-align: left; transition: border-color .15s, box-shadow .15s;
+  color: inherit; font: inherit;
+}
+.tier:hover, .tier:focus-visible { border-color: var(--blue-edge); outline: none; box-shadow: 0 4px 14px rgba(31,78,155,.1); }
+.tier.active { border-color: var(--blue-ink); box-shadow: 0 0 0 3px var(--blue); }
+.tier .tk { font-size: 10px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--mute); }
+.tier h3 { margin: 4px 0 8px; font-size: 18px; }
+.tier .band { font-size: 22px; font-weight: 800; letter-spacing: -.02em; margin: 0 0 8px; }
+.tier.quiet .band { color: var(--blue-ink); }
+.tier.mod .band { color: var(--amber-ink); }
+.tier.high .band { color: var(--purple-ink); }
+.tier p { margin: 0; font-size: 13px; color: var(--mute); }
+.callout-rule {
+  margin-top: 20px; padding: 16px 18px; border-radius: 12px;
+  background: var(--red); border: 1px solid var(--red-edge); color: var(--red-ink);
+  font-size: 15px;
+}
+.callout-rule strong { font-weight: 800; }
+.calib-notes {
+  margin-top: 14px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+}
+.calib-notes .note {
+  padding: 14px; border-radius: 10px; border: 1px solid var(--line); background: #FAFAF8; font-size: 13px;
+}
+
+/* Approver mini-cards inside node detail are in panel; stubs on board A step 5 */
+.approver-stub {
+  display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px;
+}
+.approver-stub span {
+  font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 999px;
+  background: var(--green); color: var(--green-ink);
+}
+
+/* Visual stubs inside onboarding nodes */
+.stub-map {
+  height: 48px; border-radius: 8px; background:
+    radial-gradient(circle at 45% 50%, var(--blue-ink) 0 6px, transparent 7px),
+    radial-gradient(circle at 45% 50%, rgba(31,78,155,.18) 0 22px, transparent 23px),
+    linear-gradient(135deg, #E8EEF8, #F5F7FA);
+  border: 1px solid var(--blue-edge); margin-top: 4px;
+}
+.stub-tiers { display: flex; gap: 4px; margin-top: 4px; }
+.stub-tiers i { flex: 1; height: 8px; border-radius: 4px; }
+.stub-mask {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-top: 4px; font-size: 9px; font-weight: 700;
+}
+.stub-mask span { padding: 6px 4px; border-radius: 6px; text-align: center; }
+.stub-mask .mundane { background: #FAFAF8; border: 1px solid var(--line); color: var(--mute); }
+.stub-mask .real { background: var(--purple); border: 1px solid var(--purple-edge); color: var(--purple-ink); }
+.sim-badge {
+  display: inline-block; margin-top: 4px; font-size: 9px; font-weight: 800; letter-spacing: .04em;
+  padding: 3px 6px; border-radius: 4px; background: var(--amber); color: var(--amber-ink); border: 1px solid var(--amber-edge);
+}
+
+/* Zoom controls + minimap */
+.hud {
+  position: fixed; right: 16px; bottom: 16px; z-index: 40;
+  display: flex; flex-direction: column; align-items: flex-end; gap: 10px;
+}
+.viewport.panel-open .hud { right: calc(var(--panel-w) + 16px); }
+.zoom-btns { display: flex; flex-direction: column; gap: 4px; background: #fff; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,.06); }
+.zoom-btns button {
+  width: 40px; height: 36px; border: 0; border-bottom: 1px solid var(--line);
+  background: #fff; font-size: 18px; font-weight: 600; color: var(--ink);
+}
+.zoom-btns button:last-child { border-bottom: 0; font-size: 11px; font-weight: 700; }
+.zoom-btns button:hover { background: #FAFAF8; }
+.zoom-label {
+  background: #fff; border: 1px solid var(--line); border-radius: 8px;
+  padding: 4px 10px; font-size: 11px; font-weight: 700; color: var(--mute);
+  box-shadow: 0 2px 8px rgba(0,0,0,.04);
+}
+.minimap {
+  width: 160px; height: 120px; background: #fff; border: 1px solid var(--line);
+  border-radius: 10px; position: relative; overflow: hidden; cursor: pointer;
+  box-shadow: 0 2px 10px rgba(0,0,0,.06);
+}
+.minimap .mm-world { position: absolute; inset: 6px; background: #FAFAF8; border-radius: 4px; }
+.minimap .mm-board {
+  position: absolute; background: var(--blue); border: 1px solid var(--blue-edge); border-radius: 2px; opacity: .7;
+}
+.minimap .mm-view {
+  position: absolute; border: 2px solid var(--blue-ink); background: rgba(31,78,155,.12); border-radius: 2px; pointer-events: none;
+}
+
+/* Detail panel */
+.panel {
+  position: fixed; top: 52px; right: 0; bottom: 0; width: var(--panel-w); z-index: 50;
+  background: var(--paper); border-left: 1px solid var(--line);
+  transform: translateX(100%); transition: transform .22s ease;
+  display: flex; flex-direction: column; box-shadow: -4px 0 24px rgba(0,0,0,.06);
+}
+.panel.open { transform: translateX(0); }
+.panel-hd {
+  display: flex; align-items: flex-start; gap: 10px; padding: 18px 18px 12px;
+  border-bottom: 1px solid var(--line);
+}
+.panel-hd .ph-meta { flex: 1; min-width: 0; }
+.panel-hd .ph-kicker { font-size: 11px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--mute); margin: 0 0 4px; }
+.panel-hd h3 { margin: 0; font-size: 18px; letter-spacing: -.01em; }
+.panel-close {
+  width: 36px; height: 36px; border-radius: 8px; border: 1px solid var(--line);
+  background: #fff; font-size: 18px; color: var(--mute); flex: 0 0 auto;
+}
+.panel-close:hover { background: #FAFAF8; color: var(--ink); }
+.panel-bd { padding: 16px 18px 32px; overflow-y: auto; flex: 1; font-size: 14px; }
+.panel-bd p { margin: 0 0 12px; }
+.panel-bd ul { margin: 0 0 12px; padding-left: 18px; }
+.panel-bd li { margin-bottom: 6px; }
+.panel-bd .edu {
+  padding: 12px 14px; border-radius: 10px; background: var(--blue); border: 1px solid var(--blue-edge);
+  color: var(--blue-ink); font-weight: 600; margin: 0 0 14px;
+}
+.panel-bd .finding {
+  padding: 12px 14px; border-radius: 10px; background: var(--purple); border: 1px solid var(--purple-edge);
+  color: var(--purple-ink); margin: 12px 0 0; font-size: 13px;
+}
+.panel-bd .finding strong { display: block; margin-bottom: 4px; font-size: 11px; letter-spacing: .05em; text-transform: uppercase; }
+.status-pill {
+  display: inline-block; padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 800; margin-bottom: 12px;
+}
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 12px; }
+.chip {
+  display: inline-block; padding: 3px 8px; border-radius: 999px; font-size: 11px; font-weight: 700;
+  background: #FAFAF8; border: 1px solid var(--line); color: var(--mute);
+}
+.chip.s { background: var(--green); color: var(--green-ink); border-color: var(--green-edge); }
+.chip.e { background: var(--blue); color: var(--blue-ink); border-color: var(--blue-edge); }
+.hint-bar {
+  position: fixed; left: 14px; bottom: 16px; z-index: 35;
+  font-size: 11px; color: var(--mute); background: rgba(255,255,255,.9);
+  border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px;
+  pointer-events: none;
+}
+.viewport.panel-open .hint-bar { max-width: calc(100% - var(--panel-w) - 200px); }
+
+@media (max-width: 900px) {
+  :root { --panel-w: 100%; }
+  .viewport.panel-open { right: 0; }
+  .panel { top: auto; height: 55vh; border-left: 0; border-top: 1px solid var(--line);
+    border-radius: 16px 16px 0 0; transform: translateY(110%); }
+  .panel.open { transform: translateY(0); }
+  .viewport.panel-open .hud { right: 16px; bottom: calc(55vh + 12px); }
+  .chrome .title { display: none; }
+  .badge { top: 56px; font-size: 10px; padding: 5px 10px; }
+  .hint-bar { display: none; }
+  .minimap { display: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="chrome" role="banner">
+  <a class="back" href="../" title="Back to proposal home">← Proposal</a>
+  <span class="title">Duress-Aware Wallet · Interactive canvas</span>
+  <nav class="tabs" aria-label="Jump to board">
+    <button type="button" data-jump="onboarding" class="active">Onboarding</button>
+    <button type="button" data-jump="flows">Flows</button>
+    <button type="button" data-jump="matrix">Threat matrix</button>
+    <button type="button" data-jump="calib">Calibration</button>
+    <button type="button" data-jump="story">Location story</button>
+  </nav>
+</div>
+
+<div class="badge" aria-hidden="true">INTERACTIVE DEMO · NO FUNDS · CONCEPTUAL</div>
+
+<div class="viewport" id="viewport" role="application" aria-label="Zoomable proposal canvas">
+  <div class="world" id="world">
+
+    <!-- BOARD A: Onboarding -->
+    <section class="board" id="board-onboarding" data-board="onboarding">
+      <div class="board-label">Board A</div>
+      <h2>Onboarding · 9-step flow</h2>
+      <p class="sub">Left → right setup path. Click a screen for education copy and inputs. Conceptual only — no real keys or funds.</p>
+      <div class="flow-row" id="onboarding-flow">
+        <!-- filled by JS -->
+      </div>
+    </section>
+
+    <!-- BOARD B: Flows -->
+    <section class="board" id="board-flows" data-board="flows">
+      <div class="board-label">Board B</div>
+      <h2>In-practice coercion decision tree</h2>
+      <p class="sub">If-this → then-that branches under live coercion. Click a node for stuck risks and UI state.</p>
+      <button type="button" class="node purple span2" data-id="flow-overview" id="flow-overview-btn" style="width:100%;max-width:none;margin-bottom:14px">
+        <span class="n-kicker">Overview</span>
+        <span class="n-title">Quick decision tree</span>
+        <span class="n-snip">Launch → masking → geofence → password sheet → vault / decoy / panic</span>
+      </button>
+      <div class="tree" id="flows-tree"></div>
+    </section>
+
+    <!-- BOARD C: Matrix -->
+    <section class="board" id="board-matrix" data-board="matrix">
+      <div class="board-label">Board C</div>
+      <h2>Threat-model matrix</h2>
+      <p class="sub">Attacker capability × defense. Click a cell for coverage status and mapped finding.</p>
+      <div class="mx" id="matrix-grid" role="grid" aria-label="Threat coverage matrix"></div>
+      <div class="legend">
+        <span><i class="st-covers"></i> Covers</span>
+        <span><i class="st-partial"></i> Partial</span>
+        <span><i class="st-gap"></i> Gap</span>
+      </div>
+    </section>
+
+    <!-- BOARD D: Calibration -->
+    <section class="board" id="board-calib" data-board="calib">
+      <div class="board-label">Board D</div>
+      <h2>Decoy balance calibration</h2>
+      <p class="sub">Illustrative USD bands by perceived-wealth tier. Prefer under-matching a sophisticated attacker over over-funding a decoy.</p>
+      <div class="calib-scale" id="calib-scale"></div>
+      <div class="callout-rule" role="note">
+        <strong>Never auto-mirror real balance</strong> — static or rarely reviewed decoy is the default; optional slow drift only (e.g. monthly ±10–20% band). Auto-chasing deposits collapses plausible deniability.
+      </div>
+      <div class="calib-notes">
+        <div class="note"><strong>Default: static / rare review.</strong> Sudden top-ups before travel are timing tells.</div>
+        <div class="note"><strong>Optional slow drift:</strong> scheduled, capped rebalancing tied to tier policy — not every inbound payment.</div>
+      </div>
+    </section>
+
+    <!-- BOARD E: Location story -->
+    <section class="board" id="board-story" data-board="story">
+      <div class="board-label">Board E</div>
+      <h2>Location story · geofence → vault choice</h2>
+      <p class="sub">Watch the guide walk from home into the street. With security armed, leaving the green radius locks the real vault and unlocks the decoy session (~$3k illustrative). Both wallets stay visible; only the active session changes.</p>
+
+      <div class="story-toolbar">
+        <button type="button" class="story-toggle" id="story-toggle" aria-pressed="true">Activate security measures · ON</button>
+        <span class="story-status armed" id="story-status">Armed · inside home</span>
+      </div>
+      <p class="story-caption">Location only gates vault choice — we don’t track you. Geofence is a safety policy object, not a surveillance feed.</p>
+
+      <div class="story-stage">
+        <div class="story-map-wrap" id="story-map-wrap" aria-label="Animated map of home geofence">
+          <div class="story-map"></div>
+          <div class="story-home" aria-hidden="true">
+            <span class="story-home-label">Home radius</span>
+          </div>
+          <div class="story-path-hint" aria-hidden="true"></div>
+          <div class="story-pin" title="Home" aria-hidden="true"></div>
+          <div class="story-guide" id="story-guide" aria-hidden="true"></div>
+          <div class="story-zone-tag" id="story-zone-tag">Inside geofence</div>
+        </div>
+
+        <div class="story-wallets" id="story-wallets">
+          <div class="wallet-card real active-session" id="wallet-real" data-id="story-real" role="button" tabindex="0">
+            <span class="lock-ico" id="lock-real" aria-hidden="true">🔓</span>
+            <div class="wk">Primary · real vault</div>
+            <div class="wt">Real wallet</div>
+            <div class="wb">$48,200</div>
+            <span class="ws" id="ws-real">Active session</span>
+          </div>
+          <div class="wallet-card decoy inactive" id="wallet-decoy" data-id="story-decoy" role="button" tabindex="0">
+            <span class="lock-ico" id="lock-decoy" aria-hidden="true">👁</span>
+            <div class="wk">Duress password · decoy</div>
+            <div class="wt">Decoy wallet</div>
+            <div class="wb">~$3,000</div>
+            <span class="ws" id="ws-decoy">Visible · inactive</span>
+          </div>
+          <div class="lock-row" id="lock-row" aria-label="Related locks">
+            <div class="lock-slot open" id="slot-vault"><span class="ls-t">Real vault</span><span id="slot-vault-txt">Open</span></div>
+            <div class="lock-slot open" id="slot-send"><span class="ls-t">Large send</span><span id="slot-send-txt">Normal</span></div>
+            <div class="lock-slot open" id="slot-notify"><span class="ls-t">Real alerts</span><span id="slot-notify-txt">On</span></div>
+          </div>
+        </div>
+      </div>
+      <p class="story-foot">Conceptual illustration of §4–5 biometric gating + geofence policy and §3 decoy vault. Toggle OFF to see a quieter baseline (leaving home does not auto-switch vaults). Click either wallet card for detail.</p>
+    </section>
+
+
+  </div>
+</div>
+
+<aside class="panel" id="panel" aria-hidden="true" role="dialog" aria-labelledby="panel-title">
+  <div class="panel-hd">
+    <div class="ph-meta">
+      <p class="ph-kicker" id="panel-kicker"></p>
+      <h3 id="panel-title"></h3>
+    </div>
+    <button type="button" class="panel-close" id="panel-close" aria-label="Close detail panel">×</button>
+  </div>
+  <div class="panel-bd" id="panel-bd"></div>
+</aside>
+
+<div class="hud">
+  <div class="zoom-label" id="zoom-label">100%</div>
+  <div class="minimap" id="minimap" title="Click to jump" aria-label="Minimap">
+    <div class="mm-world" id="mm-world">
+      <div class="mm-board" style="left:3%;top:3%;width:64%;height:13%"></div>
+      <div class="mm-board" style="left:3%;top:20%;width:28%;height:26%"></div>
+      <div class="mm-board" style="left:34%;top:20%;width:34%;height:26%"></div>
+      <div class="mm-board" style="left:3%;top:48%;width:64%;height:14%"></div>
+      <div class="mm-board" style="left:3%;top:66%;width:64%;height:20%"></div>
+      <div class="mm-view" id="mm-view"></div>
+    </div>
+  </div>
+  <div class="zoom-btns">
+    <button type="button" id="zoom-in" aria-label="Zoom in">+</button>
+    <button type="button" id="zoom-out" aria-label="Zoom out">−</button>
+    <button type="button" id="zoom-reset" aria-label="Reset view">Reset</button>
+  </div>
+</div>
+
+<div class="hint-bar">Scroll to zoom · Drag to pan · Click nodes for detail · Esc closes panel</div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ========== Content from proposal (do not invent claims) ========== */
+  var ONBOARDING = [
+    {
+      id: "ob-1", n: "1", title: "Welcome",
+      snip: "Decoy vault + slow-lane. Not chain privacy.",
+      edu: "This adds a decoy vault and slow-lane for big sends. It does not hide you from the chain.",
+      shows: "Plain-language why banks have limits and wallets often don’t; coercion as a first-class threat.",
+      inputs: "Continue / Not now"
+    },
+    {
+      id: "ob-2", n: "2", title: "Geofence",
+      snip: "Map + radius. Outside → password.",
+      edu: "Outside this zone, Face ID alone won’t open your real vault.",
+      shows: "Map + radius slider; optional second trusted place.",
+      inputs: "Pin home; set radius (e.g. 200m–2km)",
+      stub: "map"
+    },
+    {
+      id: "ob-3", n: "3", title: "Decoy tier",
+      snip: "Quiet · Moderate · High-profile",
+      edu: "Pick what looks believable for you. Too small can backfire.",
+      shows: "Quiet $500–$2k; Moderate ~$3k ($2–8k); High-profile $15–50k capped ≤5–10% of hot funds.",
+      inputs: "Pick tier; optional custom within band",
+      stub: "tiers"
+    },
+    {
+      id: "ob-4", n: "4", title: "Duress password",
+      snip: "Same username → decoy only",
+      edu: "Same username. This password opens only the decoy. Practice it.",
+      shows: "Two fields + strength meter; never show side-by-side with primary PW.",
+      inputs: "Set / confirm duress PW"
+    },
+    {
+      id: "ob-5", n: "5", title: "Approver model",
+      snip: "Hybrid recommended first",
+      edu: "Who (or what) must bless large sends when you’re away from home?",
+      shows: "Cards (a)–(e) with Safety/Ease chips; ranked shortlist.",
+      inputs: "Choose one; enroll contacts or service",
+      special: "approvers"
+    },
+    {
+      id: "ob-6", n: "6", title: "Transfer threshold",
+      snip: "e.g. $1,000 + 24h lock",
+      edu: "Above this, outside the fence: delay and/or approval.",
+      shows: "Amount slider + currency; preview of time-lock duration (illustrative $1,000 + 24h).",
+      inputs: "Set threshold + lock length"
+    },
+    {
+      id: "ob-7", n: "7", title: "App masking",
+      snip: "Mundane shell vs real UI",
+      edu: "Masking must survive notifications and Face ID sheets—not just the icon.",
+      shows: "Preview of mundane shell (e.g. gym tracker) vs real UI.",
+      inputs: "Enable/disable; set reveal code / gesture",
+      stub: "mask"
+    },
+    {
+      id: "ob-8", n: "8", title: "Simulation",
+      snip: "Practice wrong PW / decoy / cancel",
+      edu: "Practice once. Say the wrong password on purpose. See the decoy. Cancel freely.",
+      shows: "Safe sandbox: fake outside-fence + coercion walkthrough; no real funds move.",
+      inputs: "Run scenario; pass/fail checklist",
+      stub: "sim"
+    },
+    {
+      id: "ob-9", n: "9", title: "Done",
+      snip: "Rotate after real duress use",
+      edu: "You can change these later. After a real duress use, rotate passwords from a safe place.",
+      shows: "Summary of choices; link to settings; optional trusted-contact invite.",
+      inputs: "Finish / Invite approver"
+    }
+  ];
+
+  var APPROVERS = [
+    { id: "a", name: "(a) Separated person", safety: 5, ease: 2, how: "Pre-enrolled human co-signer; min geographic distance before approval counts for out-of-fence large transfers.", fail: "Approver unavailable / asleep; same-city travel breaks distance rule; social coercion of the approver; relationship change.", rank: 2 },
+    { id: "b", name: "(b) Third-party service", safety: 4, ease: 4, how: "Policy engine or regulated co-signer API; auto or human-reviewed under SLA.", fail: "Vendor outage; account takeover of the service; AML friction; trust concentration; cost.", rank: 3 },
+    { id: "c", name: "(c) Hybrid — recommended", safety: 5, ease: 3, how: "Ping trusted person first; if no response within N hours, escalate to service under the same threshold rules.", fail: "Double-dependency outages; user confusion which path fired; fallback may be slower under active duress.", rank: 1, rec: true },
+    { id: "d", name: "(d) Rotating approvers", safety: 4, ease: 2, how: "Round-robin or random pick from a pre-approved set so one compromised contact is not enough.", fail: "Coordination load; stale contacts; one weak link still approves; notification fatigue.", rank: 4 },
+    { id: "e", name: "(e) Delayed self-approval", safety: 3, ease: 5, how: "No second party: above-threshold sends enter a long lock (e.g. 24–72h); user can cancel; after delay, self-finalize.", fail: "Coercion lasting longer than the lock; attacker waits it out; no external check against “real password” escalation.", rank: 5 }
+  ];
+
+  var FLOWS = [
+    { id: "flow-a", letter: "(a)", title: "At-home login → real vault",
+      snip: "Inside fence + biometric → true balances",
+      body: "IF inside geofence AND biometric OK AND (no PW required OR primary PW) → UI: Real vault home (true balances) → NEXT: normal send / card spend.",
+      stuck: "User forgets they enabled “always ask PW even at home.”",
+      cls: "" },
+    { id: "flow-b", letter: "(b)", title: "Outside + FaceID + primary → real + brakes",
+      snip: "Password sheet → real vault; ≥threshold locks",
+      body: "IF outside geofence AND biometric OK → Secondary password sheet (no vault hint). IF password == primary → Real vault; sends ≥ threshold enter time-lock and/or approver queue.",
+      stuck: "User thinks Face ID failed; copy must say “password required away from home.”",
+      cls: "warn" },
+    { id: "flow-c", letter: "(c)", title: "Outside + FaceID + duress → decoy",
+      snip: "Decoy vault; notifications suppressed",
+      body: "IF outside geofence AND biometric OK AND password == duress → Decoy vault (calibrated balance, plausible history). Sends look instant in-decoy; no real-vault time-lock UI (avoid tell). Suppress or rewrite real-vault notifications while decoy session active.",
+      stuck: "Notifications from real vault leaking.",
+      cls: "rec" },
+    { id: "flow-d", letter: "(d)", title: "Above-threshold outside → pending",
+      snip: "24h pending + approver + cancel",
+      body: "IF real vault AND outside fence AND amount ≥ threshold → UI: “Pending · unlocks in 24h” + Approver notified → wait | cancel | (if model allows) speed-up via second factor.",
+      stuck: "User in café needs rent now — show clear cancel + lower-threshold settings path.",
+      cls: "warn" },
+    { id: "flow-e", letter: "(e)", title: "Approver unreachable → fallback",
+      snip: "Hybrid→service / extend / delayed-self",
+      body: "IF approval pending AND approver timeout → Fallback banner. Hybrid → escalate to service. Person-only → extend lock + try another enrolled contact (if rotating). Delayed-self → continue countdown only.",
+      stuck: "Silent failure; always show countdown + who was pinged (without revealing decoy existence).",
+      cls: "" },
+    { id: "flow-f", letter: "(f)", title: "Optional panic-drain → cold path",
+      snip: "Real funds to deep cold; decoy may cover",
+      body: "IF panic gesture/code entered (optional) → brief confirm (or zero-confirm if configured) → move real hot funds to pre-set cold/deep path; decoy session may continue for cover.",
+      stuck: "Mistype under stress; require rehearsal in Simulation; irreversible without recovery ceremony.",
+      cls: "danger",
+      finding: 8 },
+    { id: "flow-g", letter: "(g)", title: "Masking wrong code → mundane app",
+      snip: "Full gym/notes interaction; no wallet chrome",
+      body: "IF masking ON AND launch/reveal code wrong → Mundane app (gym tracker / notes) full interaction → no wallet chrome, no crypto notifications.",
+      stuck: "User forgets reveal code — recovery must not be a visible “Forgot wallet password?” on the decoy shell.",
+      cls: "purple" }
+  ];
+
+  var FLOW_OVERVIEW = "Launch\n ├─ masking ON & code wrong ──────────────→ Mundane UI (g)\n └─ masking OFF or code OK\n      ├─ inside geofence ─────────────────→ Real vault (a) [policy may still ask PW]\n      └─ outside geofence\n           └─ Face ID → password sheet\n                ├─ primary PW ────────────→ Real vault + threshold brakes (b)(d)(e)\n                ├─ duress PW ─────────────→ Decoy vault (c)\n                └─ panic code ────────────→ Panic-drain (f) then optional decoy cover";
+
+  var DEFENSES = ["Duress PW", "Geofence 2nd PW", "Time-lock", "Multi-sig", "App masking", "Panic-drain"];
+  var ATTACKS = [
+    { name: "Armed robbery (unknown loc.)", cells: ["Covers","Covers","Covers","Covers","Partial","Partial"], findings: [1,1,1,1,1,8] },
+    { name: "Kidnapping + forced biometric", cells: ["Covers","Covers","Partial","Covers","Gap","Partial"], findings: [2,2,1,2,5,8] },
+    { name: "GPS / location spoofing", cells: ["Partial","Gap","Partial","Covers","Gap","Gap"], findings: [3,3,3,3,3,3] },
+    { name: "Demand real PW after decoy xfer", cells: ["Gap","Gap","Gap","Gap","Gap","Gap"], findings: [4,4,4,4,4,4] },
+    { name: "Seed-phrase social engineering", cells: ["Gap","Gap","Gap","Gap","Partial","Gap"], findings: [5,5,5,5,5,5] },
+    { name: "Mixer laundering", cells: ["Partial","Partial","Covers","Covers","Gap","Partial"], findings: [6,6,6,6,6,6] },
+    { name: "Coercion at home (inside fence)", cells: ["Covers","Gap","Gap","Partial","Partial","Partial"], findings: [7,7,7,7,7,8] }
+  ];
+
+  var FINDINGS = {
+    1: "Best coverage is away-from-home coercion with a live phone. Armed robbery or kidnapping outside the geofence is where the stack works together: duress password → decoy vault, geofence-gated second password, time-lock and/or multi-sig on large sends, optional panic-drain.",
+    2: "Forced biometric alone is not enough if vault choice is password-bound. Outside the fence, Face ID should only unlock the device gate; which vault opens depends on the password. That breaks the “face = full treasury” failure mode.",
+    3: "GPS spoofing punches a hole in geofence policy. If “at home” can be faked, secondary-password and outside-fence rules may never fire. Multi-sig and time-locks still help; geofence itself does not. Treat location integrity as a hard dependency or fail closed.",
+    4: "Largest product gap: attacker demands the “real” password after a decoy transfer. No cell in that row is green. Calibration, training, and plausible deniability matter more than another control checkbox—and there is no cryptographic fix once the attacker knows a decoy exists.",
+    5: "Seed-phrase social engineering is largely out of band. App masking helps slightly (harder to spot a wallet). Duress/geofence/time-lock/multi-sig do not stop someone giving away a seed. Separate backup and recovery hygiene are required.",
+    6: "Mixers make post-theft recovery fail; pre-broadcast controls are the only window. Time-lock and multi-sig are the primary brakes before funds hit irreversible privacy rails. Duress/decoy only limits how much leaves in the first session.",
+    7: "Home coercion (inside geofence) is an explicit gap in geofence-gated defenses. Inside the radius, rely on duress password + believable decoy; do not assume location policy saves the user.",
+    8: "Panic-drain is optional and partial. Useful as a last-resort movement of real funds to a deep cold path, but dangerous if discoverable or mistyped under stress—keep it optional and well-rehearsed."
+  };
+
+  var TIERS = [
+    { id: "tier-quiet", cls: "quiet", kicker: "Quiet / new user", title: "Quiet", band: "$500 – $2,000",
+      body: "Thin on-chain history; new account; little or no public crypto persona. Enough to look like a real hot wallet; loss is survivable.",
+      avoid: "Attacker already saw a larger exchange KYC balance, payroll screenshot, or NFT floor that contradicts a tiny vault." },
+    { id: "tier-mod", cls: "mod", kicker: "Moderate visible activity", title: "Moderate", band: "$2,000 – $8,000 · ~$3k default",
+      body: "Months–years of ordinary txs; occasional social mentions; mid-size DeFi / card spend. Matches “serious but not whale” under short inspection.",
+      avoid: "Attacker quotes an exact portfolio (tax form, shared screen, prior shoulder-surf); decoy would be obviously wrong." },
+    { id: "tier-high", cls: "high", kicker: "High-profile / large history", title: "High-profile", band: "$15,000 – $50,000 · ≤5–10% hot",
+      body: "Public figure, known large bags, long / high-volume trail. Low decoy fails immediately against known wealth; still not treasury.",
+      avoid: "Attacker is informed (ex-partner, coworker, prior hack) and can verify exact holdings — decoy mode may be worse than refusal / empty cold story." }
+  ];
+
+  /* ========== Build DOM ========== */
+  var flowEl = document.getElementById("onboarding-flow");
+  ONBOARDING.forEach(function (step, i) {
+    if (i) {
+      var c = document.createElement("div");
+      c.className = "connector";
+      c.setAttribute("aria-hidden", "true");
+      flowEl.appendChild(c);
+    }
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "node" + (step.id === "ob-5" ? " rec" : "") + (step.id === "ob-8" ? " warn" : "");
+    btn.dataset.id = step.id;
+    var html = '<span class="n-kicker">Screen ' + step.n + '</span><span class="n-title">' + step.title + '</span><span class="n-snip">' + step.snip + '</span>';
+    if (step.stub === "map") html += '<div class="stub-map" aria-hidden="true"></div>';
+    if (step.stub === "tiers") html += '<div class="stub-tiers" aria-hidden="true"><i style="background:var(--blue)"></i><i style="background:var(--amber)"></i><i style="background:var(--purple)"></i></div>';
+    if (step.stub === "mask") html += '<div class="stub-mask" aria-hidden="true"><span class="mundane">Gym</span><span class="real">Wallet</span></div>';
+    if (step.stub === "sim") html += '<span class="sim-badge">SIMULATION · NO FUNDS MOVE</span>';
+    if (step.special === "approvers") html += '<div class="approver-stub"><span>1 · Hybrid</span><span style="background:var(--blue);color:var(--blue-ink)">2 · Person</span><span style="background:#FAFAF8;color:var(--mute)">3 · Service</span></div>';
+    btn.innerHTML = html;
+    flowEl.appendChild(btn);
+  });
+
+  var treeEl = document.getElementById("flows-tree");
+  FLOWS.forEach(function (f) {
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "node " + (f.cls || "");
+    btn.dataset.id = f.id;
+    btn.innerHTML = '<span class="n-kicker">' + f.letter + '</span><span class="n-title">' + f.title + '</span><span class="n-snip">' + f.snip + '</span>';
+    treeEl.appendChild(btn);
+  });
+
+  var mx = document.getElementById("matrix-grid");
+  var corner = document.createElement("div");
+  corner.className = "corner";
+  corner.textContent = "Attack ↓ / Defense →";
+  mx.appendChild(corner);
+  DEFENSES.forEach(function (d) {
+    var h = document.createElement("div");
+    h.className = "colh";
+    h.textContent = d;
+    mx.appendChild(h);
+  });
+  ATTACKS.forEach(function (row, ri) {
+    var rh = document.createElement("div");
+    rh.className = "rowh";
+    rh.textContent = row.name;
+    mx.appendChild(rh);
+    row.cells.forEach(function (st, ci) {
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "mx-cell st-" + st.toLowerCase();
+      b.dataset.id = "mx-" + ri + "-" + ci;
+      b.dataset.row = String(ri);
+      b.dataset.col = String(ci);
+      b.textContent = st;
+      b.setAttribute("aria-label", row.name + " × " + DEFENSES[ci] + ": " + st);
+      mx.appendChild(b);
+    });
+  });
+
+  var calibEl = document.getElementById("calib-scale");
+  TIERS.forEach(function (t) {
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "tier " + t.cls;
+    btn.dataset.id = t.id;
+    btn.innerHTML = '<div class="tk">' + t.kicker + '</div><h3>' + t.title + '</h3><div class="band">' + t.band + '</div><p>' + t.body + '</p>';
+    calibEl.appendChild(btn);
+  });
+
+  /* ========== Camera / zoom-pan ========== */
+  var viewport = document.getElementById("viewport");
+  var world = document.getElementById("world");
+  var panel = document.getElementById("panel");
+  var panelBd = document.getElementById("panel-bd");
+  var panelTitle = document.getElementById("panel-title");
+  var panelKicker = document.getElementById("panel-kicker");
+  var zoomLabel = document.getElementById("zoom-label");
+  var mmView = document.getElementById("mm-view");
+
+  var WORLD_W = 4200, WORLD_H = 4000;
+  var MIN_Z = 0.35, MAX_Z = 2.5;
+  var cam = { x: 40, y: 40, z: 0.85 };
+  var dragging = false, lastX = 0, lastY = 0, moved = false;
+  var pointers = new Map();
+  var pinchStartDist = 0, pinchStartZ = 1;
+
+  function applyCam() {
+    world.style.transform = "translate(" + cam.x + "px," + cam.y + "px) scale(" + cam.z + ")";
+    zoomLabel.textContent = Math.round(cam.z * 100) + "%";
+    updateMinimap();
+  }
+
+  function clampCam() {
+    cam.z = Math.max(MIN_Z, Math.min(MAX_Z, cam.z));
+  }
+
+  function zoomAt(clientX, clientY, nextZ) {
+    var rect = viewport.getBoundingClientRect();
+    var sx = clientX - rect.left;
+    var sy = clientY - rect.top;
+    var wx = (sx - cam.x) / cam.z;
+    var wy = (sy - cam.y) / cam.z;
+    cam.z = Math.max(MIN_Z, Math.min(MAX_Z, nextZ));
+    cam.x = sx - wx * cam.z;
+    cam.y = sy - wy * cam.z;
+    applyCam();
+  }
+
+  function jumpToBoard(id) {
+    var map = { onboarding: "onboarding", flows: "flows", matrix: "matrix", calib: "calib", story: "story" };
+    var el = document.getElementById("board-" + (map[id] || id));
+    if (!el) return;
+    var rect = viewport.getBoundingClientRect();
+    var targetZ = Math.min(1.05, Math.max(0.55, (rect.width * 0.85) / el.offsetWidth));
+    cam.z = targetZ;
+    var cx = el.offsetLeft + el.offsetWidth / 2;
+    var cy = el.offsetTop + Math.min(el.offsetHeight / 2, 280);
+    cam.x = rect.width / 2 - cx * cam.z;
+    cam.y = rect.height / 2 - cy * cam.z;
+    applyCam();
+    document.querySelectorAll(".chrome .tabs button").forEach(function (b) {
+      b.classList.toggle("active", b.dataset.jump === id);
+    });
+  }
+
+  function updateMinimap() {
+    var rect = viewport.getBoundingClientRect();
+    var mm = document.getElementById("mm-world").getBoundingClientRect();
+    var scaleX = mm.width / WORLD_W;
+    var scaleY = mm.height / WORLD_H;
+    var viewW = rect.width / cam.z;
+    var viewH = rect.height / cam.z;
+    var viewX = -cam.x / cam.z;
+    var viewY = -cam.y / cam.z;
+    mmView.style.left = (6 + viewX * scaleX) + "px";
+    mmView.style.top = (6 + viewY * scaleY) + "px";
+    mmView.style.width = Math.max(8, viewW * scaleX) + "px";
+    mmView.style.height = Math.max(8, viewH * scaleY) + "px";
+  }
+
+  viewport.addEventListener("wheel", function (e) {
+    e.preventDefault();
+    var factor = e.deltaY < 0 ? 1.08 : 1 / 1.08;
+    zoomAt(e.clientX, e.clientY, cam.z * factor);
+  }, { passive: false });
+
+  viewport.addEventListener("pointerdown", function (e) {
+    if (e.target.closest("button, a, .mx-cell, .tier, .node, .wallet-card, .story-toggle")) return;
+    pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    viewport.setPointerCapture(e.pointerId);
+    if (pointers.size === 1) {
+      dragging = true; moved = false; lastX = e.clientX; lastY = e.clientY;
+      viewport.classList.add("panning");
+    } else if (pointers.size === 2) {
+      dragging = false;
+      var pts = Array.from(pointers.values());
+      pinchStartDist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+      pinchStartZ = cam.z;
+    }
+  });
+
+  viewport.addEventListener("pointermove", function (e) {
+    if (!pointers.has(e.pointerId)) return;
+    pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (pointers.size === 2) {
+      var pts = Array.from(pointers.values());
+      var dist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+      if (pinchStartDist > 0) {
+        var midX = (pts[0].x + pts[1].x) / 2;
+        var midY = (pts[0].y + pts[1].y) / 2;
+        zoomAt(midX, midY, pinchStartZ * (dist / pinchStartDist));
+      }
+      return;
+    }
+    if (!dragging) return;
+    var dx = e.clientX - lastX, dy = e.clientY - lastY;
+    if (Math.abs(dx) + Math.abs(dy) > 3) moved = true;
+    cam.x += dx; cam.y += dy;
+    lastX = e.clientX; lastY = e.clientY;
+    applyCam();
+  });
+
+  function endPointer(e) {
+    pointers.delete(e.pointerId);
+    if (pointers.size < 2) { pinchStartDist = 0; }
+    if (pointers.size === 0) {
+      dragging = false;
+      viewport.classList.remove("panning");
+    }
+  }
+  viewport.addEventListener("pointerup", endPointer);
+  viewport.addEventListener("pointercancel", endPointer);
+
+  document.getElementById("zoom-in").addEventListener("click", function () {
+    var r = viewport.getBoundingClientRect();
+    zoomAt(r.left + r.width / 2, r.top + r.height / 2, cam.z * 1.15);
+  });
+  document.getElementById("zoom-out").addEventListener("click", function () {
+    var r = viewport.getBoundingClientRect();
+    zoomAt(r.left + r.width / 2, r.top + r.height / 2, cam.z / 1.15);
+  });
+  document.getElementById("zoom-reset").addEventListener("click", function () {
+    jumpToBoard("onboarding");
+  });
+
+  document.getElementById("minimap").addEventListener("click", function (e) {
+    var mm = document.getElementById("mm-world").getBoundingClientRect();
+    var rx = (e.clientX - mm.left) / mm.width;
+    var ry = (e.clientY - mm.top) / mm.height;
+    var rect = viewport.getBoundingClientRect();
+    cam.x = rect.width / 2 - rx * WORLD_W * cam.z;
+    cam.y = rect.height / 2 - ry * WORLD_H * cam.z;
+    applyCam();
+  });
+
+  document.querySelectorAll(".chrome .tabs button").forEach(function (b) {
+    b.addEventListener("click", function () { jumpToBoard(b.dataset.jump); });
+  });
+
+  /* ========== Detail panel ========== */
+  var activeId = null;
+
+  function clearActive() {
+    document.querySelectorAll(".node.active, .mx-cell.active, .tier.active").forEach(function (el) {
+      el.classList.remove("active");
+    });
+  }
+
+  function openPanel(id, title, kicker, html, el) {
+    activeId = id;
+    clearActive();
+    if (el) el.classList.add("active");
+    panelTitle.textContent = title;
+    panelKicker.textContent = kicker;
+    panelBd.innerHTML = html;
+    panel.classList.add("open");
+    panel.setAttribute("aria-hidden", "false");
+    viewport.classList.add("panel-open");
+    document.getElementById("panel-close").focus();
+    updateMinimap();
+  }
+
+  function closePanel() {
+    activeId = null;
+    clearActive();
+    panel.classList.remove("open");
+    panel.setAttribute("aria-hidden", "true");
+    viewport.classList.remove("panel-open");
+    updateMinimap();
+  }
+
+  document.getElementById("panel-close").addEventListener("click", closePanel);
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape") closePanel();
+  });
+
+  function stars(n) {
+    return "●".repeat(n) + "○".repeat(5 - n);
+  }
+
+  function renderOnboarding(step) {
+    var html = '<div class="edu">' + step.edu + '</div>';
+    html += '<p><strong>Shows:</strong> ' + step.shows + '</p>';
+    html += '<p><strong>User inputs:</strong> ' + step.inputs + '</p>';
+    if (step.id === "ob-5") {
+      html += '<p><strong>Ranked shortlist:</strong> (c) Hybrid → (a) Separated person → (b) Service → (d) Rotating → (e) Delayed self.</p>';
+      APPROVERS.slice().sort(function (a, b) { return a.rank - b.rank; }).forEach(function (a) {
+        html += '<div style="border:1px solid var(--line);border-radius:10px;padding:12px;margin:0 0 10px;' + (a.rec ? 'background:var(--green);border-color:var(--green-edge)' : '') + '">';
+        html += '<strong>' + a.name + (a.rec ? ' · first' : '') + '</strong>';
+        html += '<div class="chips"><span class="chip s">Safety ' + a.safety + '/5 ' + stars(a.safety) + '</span><span class="chip e">Ease ' + a.ease + '/5 ' + stars(a.ease) + '</span></div>';
+        html += '<p style="margin:0 0 6px;font-size:13px">' + a.how + '</p>';
+        html += '<p style="margin:0;font-size:12px;color:var(--mute)"><strong>Failure modes:</strong> ' + a.fail + '</p></div>';
+      });
+    }
+    if (step.id === "ob-8") {
+      html += '<p><span class="sim-badge">SIMULATION · NO FUNDS MOVE</span></p>';
+      html += '<p>Scripted steps: (1) pretend GPS = outside, (2) Face ID OK, (3) enter duress PW → decoy, (4) attempt &gt;threshold send → time-lock / approver toast, (5) logout → primary PW → real vault.</p>';
+    }
+    if (step.id === "ob-3") {
+      html += '<ul><li><strong>Quiet:</strong> $500–$2,000</li><li><strong>Moderate:</strong> $2,000–$8,000 (default ~$3,000)</li><li><strong>High-profile:</strong> $15,000–$50,000, capped ≤5–10% of hot funds</li></ul>';
+    }
+    html += '<p style="font-size:12px;color:var(--mute);margin-top:16px">Source: proposal §11 Onboarding flow · Conceptual demo only.</p>';
+    return html;
+  }
+
+  function renderFlow(f) {
+    var html = '<div class="edu">' + f.snip + '</div>';
+    html += '<p>' + f.body + '</p>';
+    html += '<p><strong>Stuck risk:</strong> ' + f.stuck + '</p>';
+    if (f.finding) {
+      html += '<div class="finding"><strong>Finding ' + f.finding + '</strong>' + FINDINGS[f.finding] + '</div>';
+    }
+    html += '<p style="font-size:12px;color:var(--mute);margin-top:16px">Source: proposal §12 In-practice conditional flows.</p>';
+    return html;
+  }
+
+  function renderMatrix(ri, ci) {
+    var row = ATTACKS[ri];
+    var st = row.cells[ci];
+    var def = DEFENSES[ci];
+    var fid = row.findings[ci];
+    var pillCls = st === "Covers" ? "st-covers" : st === "Partial" ? "st-partial" : "st-gap";
+    var html = '<span class="status-pill ' + pillCls + '">' + st + '</span>';
+    html += '<p><strong>Attack:</strong> ' + row.name + '<br/><strong>Defense:</strong> ' + def + '</p>';
+    html += '<div class="finding"><strong>Finding ' + fid + '</strong>' + FINDINGS[fid] + '</div>';
+    html += '<p style="font-size:12px;color:var(--mute);margin-top:16px">Source: threat-model matrix + findings.md · Conceptual coverage, not an audit.</p>';
+    return html;
+  }
+
+  function renderTier(t) {
+    var html = '<div class="edu">' + t.band + '</div>';
+    html += '<p>' + t.body + '</p>';
+    html += '<p><strong>When not to use this decoy:</strong> ' + t.avoid + '</p>';
+    html += '<div class="callout-rule" style="margin-top:12px"><strong>Never auto-mirror real balance</strong> (static/rare review default; optional slow drift only).</div>';
+    html += '<p style="font-size:12px;color:var(--mute);margin-top:16px">Source: proposal §9 Decoy Balance Calibration · Illustrative defaults, not compliance guidance.</p>';
+    return html;
+  }
+
+  document.getElementById("world").addEventListener("click", function (e) {
+    var node = e.target.closest("[data-id]");
+    if (!node || !viewport.contains(node)) return;
+    var id = node.dataset.id;
+
+    if (id === "flow-overview") {
+      openPanel(id, "Quick decision tree", "Board B · Overview",
+        '<pre style="white-space:pre-wrap;font-size:12px;line-height:1.55;margin:0;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--mute)">' + FLOW_OVERVIEW.replace(/</g, "&lt;") + '</pre>' +
+        '<p style="font-size:12px;color:var(--mute);margin-top:16px">Source: proposal §12 Quick decision tree.</p>', node);
+      return;
+    }
+
+    var ob = ONBOARDING.find(function (s) { return s.id === id; });
+    if (ob) {
+      openPanel(id, ob.title, "Board A · Screen " + ob.n, renderOnboarding(ob), node);
+      return;
+    }
+
+    var fl = FLOWS.find(function (s) { return s.id === id; });
+    if (fl) {
+      openPanel(id, fl.title, "Board B · Flow " + fl.letter, renderFlow(fl), node);
+      return;
+    }
+
+    if (id.indexOf("mx-") === 0) {
+      var ri = +node.dataset.row, ci = +node.dataset.col;
+      openPanel(id, ATTACKS[ri].name + " × " + DEFENSES[ci], "Board C · " + ATTACKS[ri].cells[ci],
+        renderMatrix(ri, ci), node);
+      return;
+    }
+
+    var tier = TIERS.find(function (t) { return t.id === id; });
+    if (tier) {
+      openPanel(id, tier.title + " tier", "Board D · Calibration", renderTier(tier), node);
+    }
+  });
+
+  /* Also wire overview button (outside tree) */
+  document.getElementById("flow-overview-btn").addEventListener("click", function (e) {
+    e.stopPropagation();
+    var node = e.currentTarget;
+    openPanel("flow-overview", "Quick decision tree", "Board B · Overview",
+      '<pre style="white-space:pre-wrap;font-size:12px;line-height:1.55;margin:0;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--mute)">' + FLOW_OVERVIEW.replace(/</g, "&lt;") + '</pre>' +
+      '<p style="font-size:12px;color:var(--mute);margin-top:16px">Source: proposal §12 Quick decision tree.</p>', node);
+  });
+
+  window.addEventListener("resize", function () { applyCam(); });
+
+
+  /* ========== Board E: location story animation ========== */
+  (function initStory() {
+    var guide = document.getElementById("story-guide");
+    var wrap = document.getElementById("story-map-wrap");
+    var toggle = document.getElementById("story-toggle");
+    var status = document.getElementById("story-status");
+    var zoneTag = document.getElementById("story-zone-tag");
+    var walletReal = document.getElementById("wallet-real");
+    var walletDecoy = document.getElementById("wallet-decoy");
+    var wsReal = document.getElementById("ws-real");
+    var wsDecoy = document.getElementById("ws-decoy");
+    var lockReal = document.getElementById("lock-real");
+    var lockDecoy = document.getElementById("lock-decoy");
+    var slotVault = document.getElementById("slot-vault");
+    var slotSend = document.getElementById("slot-send");
+    var slotNotify = document.getElementById("slot-notify");
+    var slotVaultTxt = document.getElementById("slot-vault-txt");
+    var slotSendTxt = document.getElementById("slot-send-txt");
+    var slotNotifyTxt = document.getElementById("slot-notify-txt");
+    if (!guide || !toggle) return;
+
+    var armed = true;
+    var outside = false;
+    // Path: home center → outside (percent of map)
+    var path = [
+      { x: 34, y: 48 },
+      { x: 40, y: 50 },
+      { x: 48, y: 54 },
+      { x: 56, y: 58 },
+      { x: 64, y: 62 },
+      { x: 72, y: 66 },
+      { x: 78, y: 70 }
+    ];
+    // Radius exit roughly around index 3–4 (x>~52)
+    var EXIT_T = 0.42;
+    var t = 0;
+    var dir = 1;
+    var lastOutside = null;
+
+    function lerp(a, b, u) { return a + (b - a) * u; }
+    function posAt(u) {
+      var n = path.length - 1;
+      var scaled = Math.max(0, Math.min(1, u)) * n;
+      var i = Math.min(n - 1, Math.floor(scaled));
+      var f = scaled - i;
+      return { x: lerp(path[i].x, path[i + 1].x, f), y: lerp(path[i].y, path[i + 1].y, f) };
+    }
+
+    function setSlots(locked) {
+      if (locked) {
+        slotVault.className = "lock-slot locked"; slotVaultTxt.textContent = "Locked";
+        slotSend.className = "lock-slot locked"; slotSendTxt.textContent = "24h / multi-sig";
+        slotNotify.className = "lock-slot locked"; slotNotifyTxt.textContent = "Suppressed";
+      } else {
+        slotVault.className = "lock-slot open"; slotVaultTxt.textContent = "Open";
+        slotSend.className = "lock-slot open"; slotSendTxt.textContent = "Normal";
+        slotNotify.className = "lock-slot open"; slotNotifyTxt.textContent = "On";
+      }
+    }
+
+    function applyState() {
+      wrap.classList.remove("outside-armed", "outside-off", "inside");
+      if (!outside) {
+        wrap.classList.add("inside");
+        zoneTag.textContent = "Inside geofence";
+        guide.classList.remove("outside");
+        // Inside: real active, decoy visible inactive
+        walletReal.className = "wallet-card real active-session";
+        walletDecoy.className = "wallet-card decoy inactive";
+        wsReal.textContent = "Active session";
+        wsDecoy.textContent = "Visible · inactive";
+        lockReal.textContent = "🔓";
+        lockDecoy.textContent = "👁";
+        setSlots(false);
+        status.textContent = armed ? "Armed · inside home" : "Disarmed · inside home";
+        status.className = "story-status" + (armed ? " armed" : "");
+      } else if (armed) {
+        wrap.classList.add("outside-armed");
+        zoneTag.textContent = "Outside · decoy active";
+        guide.classList.add("outside");
+        walletReal.className = "wallet-card real locked";
+        walletDecoy.className = "wallet-card decoy active-session";
+        wsReal.textContent = "Locked · Face ID alone won’t open";
+        wsDecoy.textContent = "Active session · ~$3k decoy";
+        lockReal.textContent = "🔒";
+        lockDecoy.textContent = "🔓";
+        setSlots(true);
+        status.textContent = "Armed · outside → decoy";
+        status.className = "story-status outside";
+      } else {
+        wrap.classList.add("outside-off");
+        zoneTag.textContent = "Outside · baseline (no auto-switch)";
+        guide.classList.add("outside");
+        walletReal.className = "wallet-card real active-session";
+        walletDecoy.className = "wallet-card decoy inactive";
+        wsReal.textContent = "Still active (security off)";
+        wsDecoy.textContent = "Visible · inactive";
+        lockReal.textContent = "🔓";
+        lockDecoy.textContent = "👁";
+        setSlots(false);
+        status.textContent = "Disarmed · outside (no lock)";
+        status.className = "story-status";
+      }
+    }
+
+    function tick(now) {
+      if (!tick._last) tick._last = now;
+      var dt = Math.min(40, now - tick._last) / 1000;
+      tick._last = now;
+      t += dir * dt * 0.085; // full loop ~12s one way
+      if (t >= 1) { t = 1; dir = -1; }
+      if (t <= 0) { t = 0; dir = 1; }
+      var p = posAt(t);
+      guide.style.left = p.x + "%";
+      guide.style.top = p.y + "%";
+      var nextOutside = t >= EXIT_T;
+      if (nextOutside !== lastOutside) {
+        outside = nextOutside;
+        lastOutside = nextOutside;
+        applyState();
+      }
+      requestAnimationFrame(tick);
+    }
+
+    toggle.addEventListener("click", function (e) {
+      e.stopPropagation();
+      armed = !armed;
+      toggle.setAttribute("aria-pressed", armed ? "true" : "false");
+      toggle.classList.toggle("off", !armed);
+      toggle.textContent = armed
+        ? "Activate security measures · ON"
+        : "Activate decoy vault · OFF (baseline)";
+      applyState();
+    });
+
+    // Wallet card clicks → panel
+    function storyDetail(which) {
+      if (which === "real") {
+        openPanel("story-real", "Real vault", "Board E · Location story",
+          '<div class="edu">Inside the home geofence, biometric may unlock the last-used (real) vault. Outside, Face ID alone won’t open the real vault when security is armed.</div>' +
+          '<p><strong>Inside:</strong> Real wallet is the active session; decoy stays visible but inactive.</p>' +
+          '<p><strong>Outside + armed:</strong> Real vault locks; large-send brakes and real alerts are gated. A password is required, and that password selects which vault opens.</p>' +
+          '<p style="font-size:12px;color:var(--mute);margin-top:16px">Source: proposal §4 Biometric gating · §5 Geofence policy.</p>',
+          walletReal);
+      } else {
+        openPanel("story-decoy", "Decoy vault", "Board E · Location story",
+          '<div class="edu">Same username. The duress password opens only the decoy — illustrative balance ~$3,000 (Moderate tier default).</div>' +
+          '<p>Both wallets remain visible in this demo so a PM can see the switch. In product UX under coercion, the attacker only sees the decoy session; real notifications are suppressed.</p>' +
+          '<p><strong>Never auto-mirror</strong> real balance into the decoy.</p>' +
+          '<div class="finding"><strong>Privacy note</strong>Location only gates vault choice — we don’t track you.</div>' +
+          '<p style="font-size:12px;color:var(--mute);margin-top:16px">Source: proposal §3 decoy vault · §9 calibration.</p>',
+          walletDecoy);
+      }
+    }
+    walletReal.addEventListener("click", function (e) { e.stopPropagation(); storyDetail("real"); });
+    walletDecoy.addEventListener("click", function (e) { e.stopPropagation(); storyDetail("decoy"); });
+    function keyAct(el, which) {
+      el.addEventListener("keydown", function (e) {
+        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.stopPropagation(); storyDetail(which); }
+      });
+    }
+    keyAct(walletReal, "real");
+    keyAct(walletDecoy, "decoy");
+
+    applyState();
+    requestAnimationFrame(tick);
+  })();
+
+
+  /* Initial view */
+  jumpToBoard("onboarding");
+  applyCam();
+})();
+</script>
+</body>
+</html>
