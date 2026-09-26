@@ -43,6 +43,18 @@
       letter-spacing: -0.02em;
       margin: 64px 0 16px;
     }
+    .quote {
+      font-family: "Instrument Serif", serif;
+      font-style: italic;
+      font-weight: 400;
+      font-size: clamp(22px, 3vw, 28px);
+      line-height: 1.3;
+      color: var(--ink);
+      max-width: 28em;
+      margin: 0 0 32px;
+      overflow-wrap: break-word;
+    }
+    .quote p + p { margin-top: 0.8em; }
     .stats {
       font-size: 12px;
       letter-spacing: 0.14em;
@@ -245,6 +257,11 @@
     </header>
 
     <h1>A public log of work.</h1>
+    <blockquote class="quote">
+      <p>Protect your focus…</p>
+      <p>Say no to distractions.</p>
+      <p>Your goals need your attention.<br />Not every notification matters.<br />Protect your focus.</p>
+    </blockquote>
     <p class="stats">5 talks · 0 papers · 2 projects</p>
     <div class="filters" data-filters>
       <button type="button" class="on" data-filter="all">All</button>
