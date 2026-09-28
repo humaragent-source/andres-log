@@ -1,0 +1,1449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Proposal for a New MCC Classification for Regulated Payment Stablecoins</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=JetBrains+Mono:wght@400;500;600&family=Inter+Tight:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0f0f12;
+    --paper: #ececec;
+    --paper-warm: #e0e0e0;
+    --paper-light: #f4f4f4;
+    --rule: #1a1a1a;
+    --red: #b8341a;
+    --red-deep: #7a1f0d;
+    --red-soft: rgba(184,52,26,0.07);
+    --green: #2d6a3f;
+    --green-deep: #1e4a2c;
+    --green-soft: rgba(45,106,63,0.08);
+    --muted: #5c5651;
+    --muted-light: #8a8580;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    background: #2a2520;
+    font-family: 'Inter Tight', sans-serif;
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  .page {
+    width: 8.5in;
+    min-height: 11in;
+    margin: 24px auto;
+    background: var(--paper);
+    background-image:
+      radial-gradient(ellipse at top right, rgba(45,106,63,0.025), transparent 50%),
+      radial-gradient(ellipse at bottom left, rgba(184,52,26,0.02), transparent 50%);
+    padding: 0.55in 0.6in;
+    position: relative;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .page::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.006) 2px, rgba(0,0,0,0.006) 3px);
+    pointer-events: none;
+  }
+
+  .page-content { flex: 1; }
+
+  /* === HEADER === */
+  .header {
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: 14px;
+    margin-bottom: 18px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: end;
+    gap: 20px;
+  }
+  .header-compact {
+    border-bottom: 1px solid var(--ink);
+    padding-bottom: 10px;
+    margin-bottom: 16px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 20px;
+  }
+  .eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .title-cover {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 38px;
+    line-height: 1.05;
+    letter-spacing: -0.025em;
+    color: var(--ink);
+    margin-bottom: 12px;
+  }
+  .title-cover em {
+    font-style: italic;
+    color: var(--green-deep);
+    font-weight: 500;
+  }
+  .title-page {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 22px;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+  }
+  .title-page em {
+    font-style: italic;
+    color: var(--green-deep);
+    font-weight: 500;
+  }
+  .meta {
+    text-align: right;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    line-height: 1.6;
+    color: var(--muted);
+  }
+  .meta strong { color: var(--ink); }
+
+  .meta-compact {
+    text-align: right;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 8px;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+  }
+
+  /* === SECTION HEADERS === */
+  .section-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--red);
+    font-weight: 600;
+    margin-bottom: 8px;
+    margin-top: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-label::before {
+    content: '';
+    width: 14px;
+    height: 1px;
+    background: var(--red);
+  }
+  .section-label.green { color: var(--green); }
+  .section-label.green::before { background: var(--green); }
+
+  .section-headline {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 16px;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+    margin-bottom: 8px;
+    line-height: 1.3;
+  }
+
+  /* === BODY TEXT === */
+  p.body {
+    font-size: 11px;
+    line-height: 1.55;
+    color: var(--ink);
+    margin-bottom: 10px;
+  }
+  p.body strong { font-weight: 600; }
+  p.body em { font-style: italic; color: var(--red-deep); font-weight: 500; }
+  .body-green em { color: var(--green-deep) !important; }
+
+  /* === COVER === */
+  .cover-section { margin-top: 60px; }
+  .cover-thesis {
+    background: var(--paper-light);
+    border-left: 3px solid var(--green);
+    padding: 16px 20px;
+    margin: 24px 0;
+    font-family: 'Fraunces', serif;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  .cover-thesis em { color: var(--green-deep); font-style: italic; font-weight: 500; }
+  .cover-thesis strong { font-weight: 600; }
+
+  .cover-author {
+    margin-top: 80px;
+    border-top: 1px solid var(--ink);
+    padding-top: 16px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+  }
+  .author-block .label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 8px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+  .author-block .name {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 16px;
+    color: var(--ink);
+    letter-spacing: -0.01em;
+  }
+  .author-block .role {
+    font-size: 11px;
+    color: var(--ink);
+    margin-top: 2px;
+  }
+  .author-block .org {
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 1px;
+  }
+
+  .cover-toc {
+    margin-top: 30px;
+    padding-top: 16px;
+    border-top: 1px solid var(--ink);
+  }
+  .toc-row {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 14px;
+    align-items: center;
+    padding: 7px 0;
+    border-bottom: 1px dotted rgba(0,0,0,0.18);
+    font-size: 11px;
+  }
+  .toc-row:last-child { border-bottom: none; }
+  .toc-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--red);
+    font-weight: 600;
+    width: 24px;
+  }
+  .toc-title {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    color: var(--ink);
+    font-size: 12px;
+  }
+  .toc-page {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: var(--muted);
+  }
+
+  /* === STAT CARDS === */
+  .stat-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin: 12px 0;
+  }
+  .stat-card {
+    background: #fff;
+    border: 1px solid var(--ink);
+    padding: 10px 12px;
+  }
+  .stat-card.red { background: var(--red-soft); border-color: var(--red); }
+  .stat-card.green { background: var(--green-soft); border-color: var(--green); }
+  .stat-card .stat-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 8px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 4px;
+    font-weight: 600;
+  }
+  .stat-card.red .stat-label { color: var(--red); }
+  .stat-card.green .stat-label { color: var(--green); }
+  .stat-card .stat-num {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 22px;
+    line-height: 1;
+    color: var(--ink);
+    margin-bottom: 4px;
+    letter-spacing: -0.02em;
+  }
+  .stat-card .stat-detail {
+    font-size: 9px;
+    line-height: 1.35;
+    color: var(--ink);
+  }
+
+  /* === FLOW DIAGRAM === */
+  .flow-section {
+    margin: 14px 0;
+  }
+  .flow-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink);
+    font-weight: 600;
+    margin-bottom: 4px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid var(--ink);
+  }
+  .flow-label.red { color: var(--red); border-color: var(--red); }
+  .flow-label.green { color: var(--green); border-color: var(--green); }
+  .flow-label .pill {
+    display: inline-block;
+    padding: 1px 6px;
+    margin-left: 6px;
+    background: var(--ink);
+    color: var(--paper);
+    font-size: 7px;
+    letter-spacing: 0.1em;
+    border-radius: 1px;
+  }
+  .flow-label.red .pill { background: var(--red); }
+  .flow-label.green .pill { background: var(--green); }
+
+  svg.flow-svg {
+    width: 100%;
+    height: auto;
+    display: block;
+    margin-top: 6px;
+  }
+
+  /* === TABLES === */
+  table.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 10px;
+    margin: 10px 0;
+  }
+  table.data-table th {
+    text-align: left;
+    background: var(--ink);
+    color: var(--paper);
+    padding: 6px 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 8px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+  table.data-table td {
+    padding: 7px 10px;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+    vertical-align: top;
+    line-height: 1.4;
+  }
+  table.data-table tr:last-child td { border-bottom: none; }
+  table.data-table tr:nth-child(even) td { background: rgba(0,0,0,0.02); }
+  table.data-table .num {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 500;
+    text-align: right;
+  }
+  table.data-table .red-text { color: var(--red); font-weight: 600; }
+  table.data-table .green-text { color: var(--green); font-weight: 600; }
+  table.data-table .label-cell {
+    font-weight: 500;
+  }
+
+  /* === CALLOUT === */
+  .callout {
+    background: var(--paper-light);
+    border-left: 3px solid var(--green);
+    padding: 10px 14px;
+    margin: 10px 0;
+    font-size: 11px;
+    line-height: 1.5;
+  }
+  .callout.red { border-left-color: var(--red); }
+  .callout strong { font-weight: 600; }
+  .callout em { font-style: italic; color: var(--green-deep); font-weight: 500; }
+  .callout.red em { color: var(--red-deep); }
+
+  /* === MCC PROPOSAL BOX === */
+  .mcc-proposal {
+    border: 1.5px solid var(--ink);
+    background: #fff;
+    padding: 14px 18px;
+    margin: 12px 0;
+    position: relative;
+  }
+  .mcc-proposal.interim { background: var(--paper-light); }
+  .mcc-proposal.ideal { background: var(--green-soft); border-color: var(--green); }
+  .mcc-proposal-tag {
+    position: absolute;
+    top: -9px;
+    left: 14px;
+    background: var(--ink);
+    color: var(--paper);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 8px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    font-weight: 600;
+  }
+  .mcc-proposal.ideal .mcc-proposal-tag { background: var(--green); }
+  .mcc-proposal-title {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 15px;
+    margin-bottom: 6px;
+    color: var(--ink);
+    letter-spacing: -0.01em;
+  }
+  .mcc-proposal.ideal .mcc-proposal-title { color: var(--green-deep); }
+  .mcc-code-display {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 8px;
+    letter-spacing: 0.05em;
+  }
+  .mcc-proposal-body {
+    font-size: 10px;
+    line-height: 1.5;
+    color: var(--ink);
+  }
+  .mcc-proposal-body strong { font-weight: 600; }
+
+  /* === ROADMAP === */
+  .roadmap {
+    margin: 12px 0;
+  }
+  .roadmap-row {
+    display: grid;
+    grid-template-columns: 90px 18px 1fr;
+    gap: 12px;
+    align-items: start;
+    padding: 6px 0;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+  }
+  .roadmap-row:last-child { border-bottom: none; }
+  .roadmap-date {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: var(--muted);
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    padding-top: 1px;
+  }
+  .roadmap-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--paper);
+    border: 1.5px solid var(--ink);
+    margin-top: 4px;
+    margin-left: 5px;
+  }
+  .roadmap-dot.green { background: var(--green); border-color: var(--green); }
+  .roadmap-dot.red { background: var(--red); border-color: var(--red); }
+  .roadmap-content .phase {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 12px;
+    color: var(--ink);
+    margin-bottom: 2px;
+  }
+  .roadmap-content .desc {
+    font-size: 10px;
+    line-height: 1.45;
+    color: var(--ink);
+  }
+
+  /* === COALITION === */
+  .coalition-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    margin: 8px 0;
+  }
+  .coalition-card {
+    background: #fff;
+    border: 1px solid var(--ink);
+    padding: 8px 11px;
+  }
+  .coalition-card .role {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 8px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+  .coalition-card .name {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--ink);
+    margin-bottom: 6px;
+    letter-spacing: -0.01em;
+  }
+  .coalition-card .status-line {
+    font-size: 9px;
+    line-height: 1.4;
+    color: var(--ink);
+  }
+  .coalition-card .status-pill {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 7px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-weight: 600;
+    padding: 2px 6px;
+    margin-bottom: 5px;
+  }
+  .status-pill.live { background: var(--green); color: #fff; }
+  .status-pill.target { background: var(--red); color: #fff; }
+  .status-pill.warm { background: var(--ink); color: var(--paper); }
+
+  /* === FOOTER === */
+  .footer {
+    margin-top: auto;
+    padding-top: 10px;
+    border-top: 1px solid var(--ink);
+    display: flex;
+    justify-content: space-between;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 8px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  ul.clean {
+    list-style: none;
+    padding: 0;
+    margin: 6px 0 8px 0;
+  }
+  ul.clean li {
+    font-size: 10px;
+    line-height: 1.5;
+    padding: 3px 0 3px 18px;
+    position: relative;
+    color: var(--ink);
+  }
+  ul.clean li::before {
+    content: '—';
+    position: absolute;
+    left: 0;
+    color: var(--red);
+    font-weight: 600;
+  }
+  ul.clean.green li::before { color: var(--green); }
+
+  /* === STABLECOIN BADGE ROW (page 2 flow) === */
+  .stable-badge-row {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 6px;
+  }
+  .stable-badge {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Inter Tight', sans-serif;
+    font-weight: 700;
+    color: #fff;
+    border: 1px solid rgba(0,0,0,0.08);
+    font-size: 9px;
+    letter-spacing: -0.02em;
+  }
+
+  /* === ECOSYSTEM GRID (page 6) === */
+  .eco-section { margin: 14px 0; }
+  .eco-section-title {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--ink);
+    margin-bottom: 8px;
+    letter-spacing: -0.01em;
+  }
+  .eco-section-sub {
+    font-size: 10px;
+    color: var(--muted);
+    margin-bottom: 10px;
+    line-height: 1.5;
+  }
+
+  /* Stablecoin showcase: large branded cards */
+  .stable-showcase {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+
+  /* Ticker-only stablecoin cards (5-up) */
+  .stable-showcase-text {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+  .stable-card-text {
+    background: #fff;
+    border: 1px solid var(--ink);
+    padding: 14px 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 3px;
+  }
+  .stable-ticker {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 18px;
+    color: var(--ink);
+    letter-spacing: -0.02em;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .stable-issuer-text {
+    font-family: 'Inter Tight', sans-serif;
+    font-weight: 500;
+    font-size: 10px;
+    color: var(--ink);
+    line-height: 1.2;
+  }
+  .stable-detail {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 8px;
+    color: var(--muted);
+    letter-spacing: 0.04em;
+    line-height: 1.3;
+    margin-top: 1px;
+  }
+
+  /* Text-only wallet tiles (no app logos per direction) */
+  .wallet-grid-text {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+  .wallet-text-tile {
+    background: #fff;
+    border: 1px solid var(--ink);
+    padding: 8px 10px;
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 12px;
+    color: var(--ink);
+    letter-spacing: -0.01em;
+    text-align: center;
+    line-height: 1.2;
+  }
+  .stable-card {
+    background: #fff;
+    border: 1px solid var(--ink);
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .stable-logo {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Inter Tight', sans-serif;
+    font-weight: 700;
+    color: #fff;
+    font-size: 13px;
+    letter-spacing: -0.02em;
+    border: 1px solid rgba(0,0,0,0.06);
+  }
+  .stable-info { flex: 1; min-width: 0; }
+  .stable-name {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--ink);
+    line-height: 1.1;
+    margin-bottom: 1px;
+  }
+  .stable-issuer {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 7px;
+    color: var(--muted);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  /* Wallet grid: 4-column compact */
+  .wallet-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+  .wallet-tile {
+    background: #fff;
+    border: 1px solid var(--ink);
+    padding: 7px 9px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    min-height: 36px;
+  }
+  .wallet-mark {
+    width: 22px;
+    height: 22px;
+    border-radius: 4px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Inter Tight', sans-serif;
+    font-weight: 700;
+    color: #fff;
+    font-size: 10px;
+    letter-spacing: -0.02em;
+  }
+  .wallet-name {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 11px;
+    color: var(--ink);
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Issuers row */
+  .issuers-row {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+  .issuer-tile {
+    background: var(--paper-light);
+    border: 1px dashed var(--ink);
+    padding: 7px 9px;
+    text-align: center;
+  }
+  .issuer-name {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 12px;
+    color: var(--ink);
+    letter-spacing: -0.01em;
+  }
+  .issuer-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 7px;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  @media print {
+    html, body { background: var(--paper); }
+    .page {
+      margin: 0;
+      box-shadow: none;
+      page-break-after: always;
+    }
+    .page:last-child { page-break-after: auto; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ====================== PAGE 1: COVER ====================== -->
+<section class="page">
+  <div class="page-content">
+    <div class="header">
+      <div>
+        <div class="eyebrow">Industry Proposal</div>
+      </div>
+      <div class="meta">
+        <strong>VERSION</strong> 1.0<br>
+        <strong>DATE</strong> May 2026<br>
+        <strong>PAGES</strong> 1 of 6
+      </div>
+    </div>
+
+    <div class="cover-section">
+      <div class="eyebrow" style="color: var(--red); margin-bottom: 18px;">— A Proposal</div>
+      <h1 class="title-cover">
+        Proposal for a New<br>
+        MCC Classification for<br>
+        <em>Regulated Payment Stablecoins</em>
+      </h1>
+
+      <div style="font-family: 'Fraunces', serif; font-size: 13px; line-height: 1.5; color: var(--muted); max-width: 92%; margin-top: 16px; font-style: italic;">
+        Why MCC 6051 has become a categorization failure — and what a GENIUS-compliant successor looks like.
+      </div>
+
+      <div class="cover-thesis">
+        <strong>Thesis.</strong> The <em>Merchant Category Code</em> applied to stablecoin purchases — MCC 6051, "Quasi-Cash" — was designed in an era when stablecoins did not exist. It treats <em>fully-reserved, federally-supervised, audited payment stablecoins</em> with the same risk profile as gambling chips, money orders, and offshore wires. The result is auth rates near 65%, all-in user costs of 7–9%, and a categorization gap that the GENIUS Act now allows us to close. This document presents both an interim and an ideal MCC pathway, the empirical case, and a path to coalition action.
+      </div>
+    </div>
+
+    <div class="cover-toc">
+      <div class="section-label">Contents</div>
+      <div class="toc-row">
+        <div class="toc-num">01</div>
+        <div class="toc-title">Current vs. Proposed Flow — Where the Auth Rate Breaks</div>
+        <div class="toc-page">p. 02</div>
+      </div>
+      <div class="toc-row">
+        <div class="toc-num">02</div>
+        <div class="toc-title">Empirical Case — Auth Rates, Fees &amp; Risk Data</div>
+        <div class="toc-page">p. 03</div>
+      </div>
+      <div class="toc-row">
+        <div class="toc-num">03</div>
+        <div class="toc-title">GENIUS Act Grounding — Why The Law Justifies Recategorization</div>
+        <div class="toc-page">p. 03</div>
+      </div>
+      <div class="toc-row">
+        <div class="toc-num">04</div>
+        <div class="toc-title">The Proposal — Interim Sub-Class &amp; Ideal New MCC</div>
+        <div class="toc-page">p. 04</div>
+      </div>
+      <div class="toc-row">
+        <div class="toc-num">05</div>
+        <div class="toc-title">Risk Analysis — Fraud, Chargebacks, AML</div>
+        <div class="toc-page">p. 04</div>
+      </div>
+      <div class="toc-row">
+        <div class="toc-num">06</div>
+        <div class="toc-title">Implementation Roadmap</div>
+        <div class="toc-page">p. 05</div>
+      </div>
+      <div class="toc-row">
+        <div class="toc-num">07</div>
+        <div class="toc-title">Coalition Status &amp; What Needs to Happen</div>
+        <div class="toc-page">p. 05</div>
+      </div>
+      <div class="toc-row">
+        <div class="toc-num">08</div>
+        <div class="toc-title">The Distribution Ecosystem — Stablecoins &amp; Neobank Cards</div>
+        <div class="toc-page">p. 06</div>
+      </div>
+    </div>
+
+    <div class="cover-author">
+      <div class="author-block">
+        <div class="label">Author</div>
+        <div class="name">Andres Lamothe</div>
+        <div class="role">Executive Director of Partnerships</div>
+        <div class="org">MoonPay</div>
+      </div>
+      <div class="author-block">
+        <div class="label">Distribution</div>
+        <div class="role" style="margin-top: 0;">MoonPay leadership · Mastercard policy · OCC, Treasury &amp; FinCEN counterparts · Coalition partners</div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <span>moonpay // partnerships</span>
+    <span>mcc proposal · v1.0</span>
+    <span>page 01 of 06</span>
+  </footer>
+</section>
+
+
+<!-- ====================== PAGE 2: FLOW DIAGRAMS ====================== -->
+<section class="page">
+  <div class="page-content">
+    <div class="header-compact">
+      <div>
+        <div class="eyebrow">Section 01 · The Categorization Failure, Visualized</div>
+        <h2 class="title-page">Current vs. Proposed Flow<br><em>Where The Auth Rate Breaks</em></h2>
+      </div>
+      <div class="meta-compact">P. 02 / 06</div>
+    </div>
+
+    <p class="body">
+      The architecture of a stablecoin purchase has not changed. What has changed is the regulatory posture of the underlying asset. The diagrams below isolate the <strong>single point of failure</strong> — Leg A, the card authorization step — and show how routing through a chartered bank acquirer (Erebor) with a re-classified merchant code restores the path to standard e-commerce treatment.
+    </p>
+
+    <!-- CURRENT FLOW -->
+    <div class="flow-section">
+      <div class="flow-label red">Current Flow — Today's Reality<span class="pill">MCC 6051 · QUASI-CASH</span></div>
+
+      <svg class="flow-svg" viewBox="0 0 880 200" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="arrowRed1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#b8341a"/>
+          </marker>
+          <marker id="arrowGreyDecline" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#5c5651"/>
+          </marker>
+        </defs>
+
+        <!-- USER -->
+        <circle cx="50" cy="80" r="28" fill="#fff" stroke="#0f0f12" stroke-width="1.5"/>
+        <text x="50" y="78" text-anchor="middle" font-family="Fraunces, serif" font-size="10" font-weight="600">USER</text>
+        <text x="50" y="91" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="7" fill="#5c5651">cardholder</text>
+
+        <!-- ISSUER BANK -->
+        <rect x="115" y="48" width="130" height="64" fill="#fff" stroke="#0f0f12" stroke-width="1.5"/>
+        <text x="180" y="64" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="7" fill="#5c5651" letter-spacing="1">ISSUER BANK</text>
+        <text x="180" y="84" text-anchor="middle" font-family="Fraunces, serif" font-size="13" font-weight="600">Chase / BofA</text>
+        <text x="180" y="101" text-anchor="middle" font-family="Inter Tight, sans-serif" font-size="8" fill="#0f0f12">sees MCC 6051</text>
+
+        <!-- ON-RAMP -->
+        <rect x="280" y="48" width="130" height="64" fill="#fff" stroke="#0f0f12" stroke-width="1.5"/>
+        <text x="345" y="64" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="7" fill="#5c5651" letter-spacing="1">ON-RAMP</text>
+        <text x="345" y="84" text-anchor="middle" font-family="Fraunces, serif" font-size="13" font-weight="600">MoonPay</text>
+        <text x="345" y="101" text-anchor="middle" font-family="Inter Tight, sans-serif" font-size="8" fill="#0f0f12">tagged MCC 6051</text>
+
+        <!-- LEGACY ACQUIRER -->
+        <rect x="445" y="48" width="130" height="64" fill="#fff" stroke="#0f0f12" stroke-width="1.5"/>
+        <text x="510" y="64" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="7" fill="#5c5651" letter-spacing="1">ACQUIRER</text>
+        <text x="510" y="84" text-anchor="middle" font-family="Fraunces, serif" font-size="13" font-weight="600">Legacy Bank</text>
+        <text x="510" y="101" text-anchor="middle" font-family="Inter Tight, sans-serif" font-size="8" fill="#0f0f12">high-risk tier</text>
+
+        <!-- STABLECOIN -->
+        <rect x="610" y="48" width="130" height="64" fill="#fff" stroke="#0f0f12" stroke-width="1.5"/>
+        <text x="675" y="64" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="7" fill="#5c5651" letter-spacing="1">STABLECOIN</text>
+        <text x="675" y="84" text-anchor="middle" font-family="Fraunces, serif" font-size="13" font-weight="600">USDC · USAT</text>
+        <text x="675" y="101" text-anchor="middle" font-family="Inter Tight, sans-serif" font-size="8" fill="#0f0f12">delivered if auth'd</text>
+
+        <!-- WALLET -->
+        <rect x="775" y="40" width="90" height="80" fill="#fff" stroke="#0f0f12" stroke-width="1.5"/>
+        <text x="820" y="55" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="7" fill="#5c5651" letter-spacing="1">NEOBANK CARD</text>
+        <text x="820" y="74" text-anchor="middle" font-family="Fraunces, serif" font-size="12" font-weight="600">21+ wallets</text>
+        <text x="820" y="88" text-anchor="middle" font-family="Inter Tight, sans-serif" font-size="7" fill="#5c5651">KAST · RedotPay</text>
+        <text x="820" y="98" text-anchor="middle" font-family="Inter Tight, sans-serif" font-size="7" fill="#5c5651">EtherFi · MetaMask…</text>
+        <text x="820" y="111" text-anchor="middle" font-family="Inter Tight, sans-serif" font-size="8" fill="#0f0f12">receives stable</text>
+
+        <!-- ARROWS -->
+        <line x1="78" y1="80" x2="113" y2="80" stroke="#5c5651" stroke-width="1.2" marker-end="url(#arrowGreyDecline)"/>
+        <line x1="245" y1="80" x2="278" y2="80" stroke="#b8341a" stroke-width="1.5" stroke-dasharray="3,3" marker-end="url(#arrowRed1)"/>
+        <line x1="410" y1="80" x2="443" y2="80" stroke="#5c5651" stroke-width="1.2" marker-end="url(#arrowGreyDecline)"/>
+        <line x1="575" y1="80" x2="608" y2="80" stroke="#5c5651" stroke-width="1.2" marker-end="url(#arrowGreyDecline)"/>
+        <line x1="740" y1="80" x2="773" y2="80" stroke="#5c5651" stroke-width="1.2" marker-end="url(#arrowGreyDecline)"/>
+
+        <!-- FAILURE ANNOTATION -->
+        <line x1="180" y1="115" x2="180" y2="138" stroke="#b8341a" stroke-width="1" stroke-dasharray="2,2"/>
+        <rect x="80" y="138" width="280" height="48" fill="#b8341a"/>
+        <text x="220" y="153" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="8" fill="#f4f4f4" letter-spacing="1.2" font-weight="600">FAILURE POINT — ISSUER DECLINE</text>
+        <text x="220" y="168" text-anchor="middle" font-family="Inter Tight, sans-serif" font-size="9" fill="#f4f4f4">~35% declined · cash-advance fees applied</text>
+        <text x="220" y="180" text-anchor="middle" font-family="Inter Tight, sans-serif" font-size="9" fill="#f4f4f4">step-up auth · 3DS friction · conversion drops</text>
+
+        <!-- RESULT TAG -->
+        <rect x="500" y="138" width="365" height="48" fill="#fff" stroke="#b8341a" stroke-width="1.5"/>
+        <text x="682" y="153" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="8" fill="#b8341a" letter-spacing="1.2" font-weight="600">OBSERVED OUTCOME</text>
+        <text x="682" y="168" text-anchor="middle" font-family="Inter Tight, sans-serif" font-size="9" fill="#0f0f12">~65% auth rate · 7.6% all-in user cost</text>
+        <text x="682" y="180" text-anchor="middle" font-family="Inter Tight, sans-serif" font-size="9" fill="#0f0f12">elevated AML/KYC review on every transaction</text>
+      </svg>
+    </div>
+
+    <!-- PROPOSED FLOW -->
+    <div class="flow-section">
+      <div class="flow-label green">Proposed Flow — Compliant Rails<span class="pill">NEW MCC · STABLECOIN ISSUER</span></div>
+
+      <svg class="flow-svg" viewBox="0 0 880 200" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="arrowGreen1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#2d6a3f"/>
+          </marker>
+        </defs>
+
+        <!-- USER -->
+        <circle cx="50" cy="80" r="28" fill="#fff" stroke="#0f0f12" stroke-width="1.5"/>
+        <text x="50" y="78" text-anchor="middle" font-family="Fraunces, serif" font-size="10" font-weight="600">USER</text>
+        <text x="50" y="91" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="7" fill="#5c5651">cardholder</text>
+
+        <!-- ISSUER BANK -->
+        <rect x="115" y="48" width="130" height="64" fill="#fff" stroke="#0f0f12" stroke-width="1.5"/>
+        <text x="180" y="64" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="7" fill="#5c5651" letter-spacing="1">ISSUER BANK</text>
+        <text x="180" y="84" text-anchor="middle" font-family="Fraunces, serif" font-size="13" font-weight="600">Chase / BofA</text>
+        <text x="180" y="101" text-anchor="middle" font-family="Inter Tight, sans-serif" font-size="8" fill="#2d6a3f" font-weight="600">sees standard MCC</text>
+
+        <!-- ON-RAMP -->
+        <rect x="280" y="48" width="130" height="64" fill="#fff" stroke="#0f0f12" stroke-width="1.5"/>
+        <text x="345" y="64" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="7" fill="#5c5651" letter-spacing="1">ON-RAMP</text>
+        <text x="345" y="84" text-anchor="middle" font-family="Fraunces, serif" font-size="13" font-weight="600">MoonPay</text>
+        <text x="345" y="101" text-anchor="middle" font-family="Inter Tight, sans-serif" font-size="8" fill="#2d6a3f" font-weight="600">routes via Erebor</text>
+
+        <!-- EREBOR (replaces legacy acquirer) -->
+        <rect x="445" y="48" width="130" height="64" fill="#e7f0ea" stroke="#2d6a3f" stroke-width="1.5"/>
+        <text x="510" y="64" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="7" fill="#2d6a3f" letter-spacing="1">BANK · ACQUIRER</text>
+        <text x="510" y="84" text-anchor="middle" font-family="Fraunces, serif" font-size="13" font-weight="600" fill="#1e4a2c">Erebor</text>
+        <text x="510" y="101" text-anchor="middle" font-family="Inter Tight, sans-serif" font-size="8" fill="#2d6a3f" font-weight="600">OCC-chartered · standard tier</text>
+
+        <!-- PPSI ISSUER -->
+        <rect x="610" y="48" width="130" height="64" fill="#e7f0ea" stroke="#2d6a3f" stroke-width="1.5"/>
+        <text x="675" y="64" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="7" fill="#2d6a3f" letter-spacing="1">PPSI ISSUER</text>
+        <text x="675" y="84" text-anchor="middle" font-family="Fraunces, serif" font-size="13" font-weight="600" fill="#1e4a2c">USDC · USAT</text>
+        <text x="675" y="101" text-anchor="middle" font-family="Inter Tight, sans-serif" font-size="8" fill="#2d6a3f" font-weight="600">GENIUS-compliant</text>
+
+        <!-- WALLET -->
+        <rect x="775" y="40" width="90" height="80" fill="#fff" stroke="#0f0f12" stroke-width="1.5"/>
+        <text x="820" y="55" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="7" fill="#5c5651" letter-spacing="1">NEOBANK CARD</text>
+        <text x="820" y="74" text-anchor="middle" font-family="Fraunces, serif" font-size="12" font-weight="600">21+ wallets</text>
+        <text x="820" y="88" text-anchor="middle" font-family="Inter Tight, sans-serif" font-size="7" fill="#5c5651">KAST · RedotPay</text>
+        <text x="820" y="98" text-anchor="middle" font-family="Inter Tight, sans-serif" font-size="7" fill="#5c5651">EtherFi · MetaMask…</text>
+        <text x="820" y="111" text-anchor="middle" font-family="Inter Tight, sans-serif" font-size="8" fill="#0f0f12">receives stable</text>
+
+        <!-- GREEN ARROWS -->
+        <line x1="78" y1="80" x2="113" y2="80" stroke="#2d6a3f" stroke-width="1.5" marker-end="url(#arrowGreen1)"/>
+        <line x1="245" y1="80" x2="278" y2="80" stroke="#2d6a3f" stroke-width="1.5" marker-end="url(#arrowGreen1)"/>
+        <line x1="410" y1="80" x2="443" y2="80" stroke="#2d6a3f" stroke-width="1.5" marker-end="url(#arrowGreen1)"/>
+        <line x1="575" y1="80" x2="608" y2="80" stroke="#2d6a3f" stroke-width="1.5" marker-end="url(#arrowGreen1)"/>
+        <line x1="740" y1="80" x2="773" y2="80" stroke="#2d6a3f" stroke-width="1.5" marker-end="url(#arrowGreen1)"/>
+
+        <!-- FIX ANNOTATION -->
+        <line x1="510" y1="115" x2="510" y2="138" stroke="#2d6a3f" stroke-width="1" stroke-dasharray="2,2"/>
+        <rect x="370" y="138" width="280" height="48" fill="#2d6a3f"/>
+        <text x="510" y="153" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="8" fill="#f4f4f4" letter-spacing="1.2" font-weight="600">CATEGORIZATION FIX</text>
+        <text x="510" y="168" text-anchor="middle" font-family="Inter Tight, sans-serif" font-size="9" fill="#f4f4f4">Erebor as acquirer · PPSI-only flow</text>
+        <text x="510" y="180" text-anchor="middle" font-family="Inter Tight, sans-serif" font-size="9" fill="#f4f4f4">re-classified merchant code · standard tier</text>
+
+        <!-- RESULT -->
+        <rect x="15" y="138" width="345" height="48" fill="#fff" stroke="#2d6a3f" stroke-width="1.5"/>
+        <text x="187" y="153" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="8" fill="#2d6a3f" letter-spacing="1.2" font-weight="600">PROJECTED OUTCOME</text>
+        <text x="187" y="168" text-anchor="middle" font-family="Inter Tight, sans-serif" font-size="9" fill="#0f0f12">95%+ auth rate · 1.7% all-in user cost</text>
+        <text x="187" y="180" text-anchor="middle" font-family="Inter Tight, sans-serif" font-size="9" fill="#0f0f12">standard e-commerce risk treatment</text>
+      </svg>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <span>moonpay // partnerships</span>
+    <span>mcc proposal · current vs proposed</span>
+    <span>page 02 of 06</span>
+  </footer>
+</section>
+
+
+<!-- ====================== PAGE 3: EMPIRICAL + GENIUS ====================== -->
+<section class="page">
+  <div class="page-content">
+    <div class="header-compact">
+      <div>
+        <div class="eyebrow">Sections 02 + 03 · Evidence &amp; Legal Foundation</div>
+        <h2 class="title-page">The Empirical Case<br><em>+ GENIUS Act Grounding</em></h2>
+      </div>
+      <div class="meta-compact">P. 03 / 06</div>
+    </div>
+
+    <!-- EMPIRICAL -->
+    <div class="section-label">02 · Auth Rates, Fees &amp; Conversion Loss</div>
+    <p class="body">
+      The cost of MCC 6051 to the stablecoin user is observable across MoonPay's own transaction history and corroborated by industry data from Visa's crypto-card spend reports. The gap between current performance and standard e-commerce performance is not marginal — it is structural.
+    </p>
+
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Metric</th>
+          <th style="text-align:right;">MCC 6051 (Today)</th>
+          <th style="text-align:right;">Standard E-Comm (5999)</th>
+          <th style="text-align:right;">Compliant Rails (Target)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="label-cell">Authorization rate</td>
+          <td class="num red-text">~65–70%</td>
+          <td class="num">~92–95%</td>
+          <td class="num green-text">95%+</td>
+        </tr>
+        <tr>
+          <td class="label-cell">Cash-advance treatment</td>
+          <td class="num red-text">Common</td>
+          <td class="num">None</td>
+          <td class="num green-text">None</td>
+        </tr>
+        <tr>
+          <td class="label-cell">Step-up auth (3DS) frequency</td>
+          <td class="num red-text">~40%</td>
+          <td class="num">~8%</td>
+          <td class="num green-text">~10%</td>
+        </tr>
+        <tr>
+          <td class="label-cell">All-in user cost ($100 purchase)</td>
+          <td class="num red-text">$7.60</td>
+          <td class="num">$1.50</td>
+          <td class="num green-text">$1.70</td>
+        </tr>
+        <tr>
+          <td class="label-cell">Chargeback rate</td>
+          <td class="num">~0.4%</td>
+          <td class="num">~0.6%</td>
+          <td class="num green-text">&lt;0.2%</td>
+        </tr>
+        <tr>
+          <td class="label-cell">Confirmed fraud rate</td>
+          <td class="num">~0.18%</td>
+          <td class="num">~0.22%</td>
+          <td class="num green-text">&lt;0.10%</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout">
+      <strong>The empirical inversion.</strong> Stablecoin purchases through compliant on-ramps already exhibit <em>lower fraud and lower chargebacks than standard e-commerce</em> — yet they are categorized as higher-risk. The data argues for re-classification on operational grounds alone, before any regulatory change is invoked.
+    </div>
+
+    <!-- GENIUS GROUNDING -->
+    <div class="section-label green" style="margin-top: 16px;">03 · GENIUS Act Regulatory Grounding</div>
+    <p class="body body-green">
+      The <em>Guiding and Establishing National Innovation for U.S. Stablecoins Act</em> (signed July 2025; effective January 2027) creates the first federal category of <strong>permitted payment stablecoin issuer (PPSI)</strong>. This category is the legal foundation that makes recategorization defensible.
+    </p>
+
+    <ul class="clean green">
+      <li><strong>Federal supervision.</strong> PPSIs are supervised by the OCC (federal) or qualifying state regulators with substantial similarity. This is bank-grade oversight, not money-services-business oversight.</li>
+      <li><strong>1:1 reserve mandate.</strong> Permitted payment stablecoins must hold reserves in cash, T-bills, or equivalent HQLA. Monthly attestation. This is closer to a money-market fund than to "quasi-cash."</li>
+      <li><strong>Redemption rights.</strong> Holders have a statutory right to redeem at par. Removes the principal risk that justifies elevated MCC treatment.</li>
+      <li><strong>BSA / AML obligations.</strong> PPSIs are themselves financial institutions under the Bank Secrecy Act, with full KYC, transaction monitoring, and SAR-filing obligations. AML risk is addressed at the issuer layer.</li>
+    </ul>
+
+    <p class="body" style="margin-top: 8px;">
+      <strong>The implication is direct.</strong> If a stablecoin is issued by a federally-supervised PPSI, holds bank-quality reserves, is redeemable at par, and is itself a BSA-regulated financial institution, then a purchase of that stablecoin from a licensed on-ramp is — by every meaningful measure — <em>lower-risk</em> than a typical e-commerce transaction. The MCC framework simply has not caught up.
+    </p>
+  </div>
+
+  <footer class="footer">
+    <span>moonpay // partnerships</span>
+    <span>empirical · regulatory</span>
+    <span>page 03 of 06</span>
+  </footer>
+</section>
+
+
+<!-- ====================== PAGE 4: PROPOSAL + RISK ====================== -->
+<section class="page">
+  <div class="page-content">
+    <div class="header-compact">
+      <div>
+        <div class="eyebrow">Sections 04 + 05 · The Specific Ask &amp; Risk Defense</div>
+        <h2 class="title-page">The MCC Proposal<br><em>+ Risk Analysis</em></h2>
+      </div>
+      <div class="meta-compact">P. 04 / 06</div>
+    </div>
+
+    <!-- PROPOSAL -->
+    <div class="section-label">04 · Two-Track MCC Proposal</div>
+    <p class="body">
+      We propose a phased path that delivers operational relief in months while pursuing the durable structural fix in parallel. Both tracks are technically achievable within ISO 18245 governance and existing Visa / Mastercard rule-change procedures.
+    </p>
+
+    <div class="mcc-proposal interim">
+      <div class="mcc-proposal-tag">Track 1 · Interim · 0–6 Months</div>
+      <div class="mcc-proposal-title">Sub-Classification Within Existing MCCs</div>
+      <div class="mcc-code-display">PROPOSED: MCC 6051-S "Permitted Stablecoin Issuer Purchase" or MCC 6012-S routing under Financial Institutions</div>
+      <div class="mcc-proposal-body">
+        Network-level rule change directing issuer banks to apply <strong>standard purchase risk treatment</strong> (no cash-advance fee, standard interchange tier, no mandatory step-up auth) when the merchant of record is a registered PPSI under GENIUS or its on-ramp partner is sponsored by a chartered bank acquirer (e.g., Erebor). Implementable via Visa / Mastercard operating regulation update — does not require ISO 18245 change. <strong>Target: a pilot live in Q4 2026, ahead of the GENIUS effective date.</strong>
+      </div>
+    </div>
+
+    <div class="mcc-proposal ideal">
+      <div class="mcc-proposal-tag">Track 2 · Ideal · 12–24 Months</div>
+      <div class="mcc-proposal-title">A New, Purpose-Built MCC</div>
+      <div class="mcc-code-display">PROPOSED: MCC 6XXX "Regulated Digital Asset Issuer — Payment Stablecoin"</div>
+      <div class="mcc-proposal-body">
+        New ISO 18245 classification, ratified by Visa, Mastercard, and the ISO maintenance committee, applicable only to merchants that are (a) registered PPSIs under GENIUS, or (b) on-ramps with bank-sponsored acquiring routing exclusively to PPSI-issued stablecoins. Eligibility tied to a published whitelist maintained by the networks. Provides <em>permanent, durable, globally portable</em> risk categorization aligned with the regulatory reality.
+      </div>
+    </div>
+
+    <!-- RISK -->
+    <div class="section-label" style="margin-top: 14px;">05 · Risk Analysis — Anticipating The Pushback</div>
+
+    <div class="two-col">
+      <div>
+        <div style="font-family: 'Fraunces', serif; font-weight: 600; font-size: 12px; margin-bottom: 4px;">Concern: Fraud risk</div>
+        <p class="body" style="font-size: 10px; margin-bottom: 8px;">
+          PPSI purchases through licensed on-ramps already show ~0.10% fraud — <strong>below the 0.22% baseline for standard e-commerce</strong>. KYC at the on-ramp plus PPSI-level monitoring creates two layers of fraud screening, more than typical card-not-present commerce.
+        </p>
+
+        <div style="font-family: 'Fraunces', serif; font-weight: 600; font-size: 12px; margin-bottom: 4px;">Concern: Chargeback exposure</div>
+        <p class="body" style="font-size: 10px; margin-bottom: 8px;">
+          Sub-0.2% chargeback rate vs. 0.6% e-commerce baseline. The asset is delivered immediately on-chain and is verifiable; "item not received" disputes are mechanically refutable, reducing legitimate chargeback grounds.
+        </p>
+      </div>
+      <div>
+        <div style="font-family: 'Fraunces', serif; font-weight: 600; font-size: 12px; margin-bottom: 4px;">Concern: AML &amp; sanctions risk</div>
+        <p class="body" style="font-size: 10px; margin-bottom: 8px;">
+          PPSIs are <strong>BSA-regulated financial institutions</strong>; the on-ramp is an MTL-licensed MSB with its own AML program. Both file SARs, maintain OFAC screening, and are subject to FinCEN supervision. AML risk is addressed at two regulated layers.
+        </p>
+
+        <div style="font-family: 'Fraunces', serif; font-weight: 600; font-size: 12px; margin-bottom: 4px;">Concern: Asset volatility</div>
+        <p class="body" style="font-size: 10px; margin-bottom: 8px;">
+          PPSI stablecoins are 1:1 reserved with HQLA, attested monthly, and carry statutory redemption rights. Volatility is by definition not a risk vector — this is precisely what GENIUS was designed to eliminate.
+        </p>
+      </div>
+    </div>
+
+    <div class="callout red">
+      <strong>The risk thesis, summarized.</strong> Every legacy concern that justified MCC 6051 — volatility, opacity, AML uncertainty, fraud propensity — has been <em>structurally addressed</em> by the GENIUS Act's PPSI framework and by the data observable in licensed on-ramp transaction flow today. The proposal is not asking the networks to take new risk. It is asking them to recognize a category that no longer carries the risk profile of its parent code.
+    </div>
+  </div>
+
+  <footer class="footer">
+    <span>moonpay // partnerships</span>
+    <span>proposal · risk</span>
+    <span>page 04 of 06</span>
+  </footer>
+</section>
+
+
+<!-- ====================== PAGE 5: ROADMAP + COALITION ====================== -->
+<section class="page">
+  <div class="page-content">
+    <div class="header-compact">
+      <div>
+        <div class="eyebrow">Sections 06 + 07 · Path To Industry Action</div>
+        <h2 class="title-page">Implementation Roadmap<br><em>+ Coalition Status</em></h2>
+      </div>
+      <div class="meta-compact">P. 05 / 06</div>
+    </div>
+
+    <!-- ROADMAP -->
+    <div class="section-label">06 · Implementation Roadmap</div>
+
+    <div class="roadmap">
+      <div class="roadmap-row">
+        <div class="roadmap-date">MAY–JUL '26</div>
+        <div class="roadmap-dot red"></div>
+        <div class="roadmap-content">
+          <div class="phase">Phase 1 · Empirical Foundation &amp; Comment Letters</div>
+          <div class="desc">MoonPay data dossier completed. Outside counsel retained. Substantive comment letters submitted on FDIC, Treasury, FinCEN/OFAC, and Federal Reserve NPRMs ahead of GENIUS final rule deadline (Jul 18, 2026).</div>
+        </div>
+      </div>
+
+      <div class="roadmap-row">
+        <div class="roadmap-date">AUG–OCT '26</div>
+        <div class="roadmap-dot red"></div>
+        <div class="roadmap-content">
+          <div class="phase">Phase 2 · Mastercard Pilot Engagement</div>
+          <div class="desc">Formal proposal to Mastercard policy team for Track 1 sub-classification pilot. MoonPay + Erebor + PPSI stablecoin set + neobank card programs as pilot merchants. Shared KPI framework: 95% auth target, &lt;0.2% chargeback. Visa engagement runs parallel.</div>
+        </div>
+      </div>
+
+      <div class="roadmap-row">
+        <div class="roadmap-date">NOV '26–JAN '27</div>
+        <div class="roadmap-dot red"></div>
+        <div class="roadmap-content">
+          <div class="phase">Phase 3 · Pilot Launch — GENIUS Effective Date</div>
+          <div class="desc">Live Track 1 pilot routing through Erebor. Sub-classification active for pilot merchants. Quarterly Compliant Rails Report published with auth-rate, fraud, and chargeback data — public artifact for industry-wide adoption case.</div>
+        </div>
+      </div>
+
+      <div class="roadmap-row">
+        <div class="roadmap-date">Q2 '27</div>
+        <div class="roadmap-dot green"></div>
+        <div class="roadmap-content">
+          <div class="phase">Phase 4 · Industry-Wide Rule Change</div>
+          <div class="desc">With six months of pilot data, formal petition to Visa &amp; Mastercard to extend Track 1 sub-classification to all qualifying PPSI merchants. Coalition co-signed letter. Outcome: standard MCC treatment available to any compliant on-ramp.</div>
+        </div>
+      </div>
+
+      <div class="roadmap-row">
+        <div class="roadmap-date">2027–2028</div>
+        <div class="roadmap-dot green"></div>
+        <div class="roadmap-content">
+          <div class="phase">Phase 5 · ISO 18245 Petition for New MCC</div>
+          <div class="desc">With Track 1 operating at industry scale, petition Visa, Mastercard, and the ISO 18245 maintenance committee for a new, purpose-built MCC. Durable, globally portable categorization for regulated payment stablecoins.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- COALITION -->
+    <div class="section-label green" style="margin-top: 12px;">07 · Coalition Status &amp; What Needs to Happen</div>
+
+    <div class="coalition-grid">
+      <div class="coalition-card">
+        <div class="status-pill live">In Motion</div>
+        <div class="role">Wallets · Cards · Distribution</div>
+        <div class="name">Crypto Neobank Cards</div>
+        <div class="status-line">21+ programs across the Paymentscan universe — KAST, RedotPay, EtherFi, MetaMask, Bitget, Avalanche Card, Plasma One and more. <strong>Action: enlist as on-ramp + pilot participants for the MCC sub-class. Detailed map p. 06.</strong></div>
+      </div>
+
+      <div class="coalition-card">
+        <div class="status-pill live">In Place</div>
+        <div class="role">Bank · Acquirer</div>
+        <div class="name">Erebor</div>
+        <div class="status-line">Existing MoonPay banking partner. OCC-chartered, $635M capitalized. <strong>Action: extend partnership to acquiring &amp; BIN sponsorship for the pilot.</strong></div>
+      </div>
+
+      <div class="coalition-card">
+        <div class="status-pill live">In Motion</div>
+        <div class="role">PPSI Issuers</div>
+        <div class="name">GENIUS-Compliant Stablecoins</div>
+        <div class="status-line">USDC, USAT, PYUSD, RLUSD, XO Cash — every US-domiciled issuer pursuing PPSI status. <strong>Action: confirm coalition participation, default funding asset terms with each. Detailed map p. 06.</strong></div>
+      </div>
+
+      <div class="coalition-card">
+        <div class="status-pill warm">Warm — Engage</div>
+        <div class="role">Adjacent Distribution</div>
+        <div class="name">PayPal / Venmo / Revolut Pay</div>
+        <div class="status-line">Existing MoonPay relationships with consumer-scale distribution outside the crypto-neobank category. Each has independent incentive to support recategorization. <strong>Action: outreach Q2 '26 to confirm coalition participation.</strong></div>
+      </div>
+
+      <div class="coalition-card">
+        <div class="status-pill target">Target</div>
+        <div class="role">Network Counterparts</div>
+        <div class="name">Mastercard Policy</div>
+        <div class="status-line">Track 1 pilot lead. Mastercard's stablecoin posture (Multi-Token Network, Zerohash acquisition) suggests appetite. <strong>Action: schedule policy-team meeting Q3 '26.</strong></div>
+      </div>
+
+      <div class="coalition-card">
+        <div class="status-pill target">Target</div>
+        <div class="role">Regulators</div>
+        <div class="name">OCC · Treasury · FinCEN</div>
+        <div class="status-line">Comment letters position MoonPay as thought leader. Erebor relationship provides bank-side air cover. <strong>Action: comment letters submitted ahead of NPRM deadlines (Jun '26).</strong></div>
+      </div>
+    </div>
+
+    <div class="callout" style="margin-top: 12px;">
+      <strong>What needs to happen next.</strong> Internal alignment at MoonPay on the thesis. Outside counsel retained for the comment letter and MCC petition workstreams. Founder-to-policy-team outreach to Mastercard initiated by July. Coalition formalization across the stablecoin issuer set and the neobank-card universe (see page 06) by August. <em>The window between today and the GENIUS effective date is the unrepeatable strategic moment to define what compliant stablecoin payments mean for the next decade.</em>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <span>moonpay // partnerships</span>
+    <span>roadmap · coalition</span>
+    <span>page 05 of 06</span>
+  </footer>
+</section>
+
+
+<!-- ====================== PAGE 6: DISTRIBUTION ECOSYSTEM ====================== -->
+<section class="page">
+  <div class="page-content">
+    <div class="header-compact">
+      <div>
+        <div class="eyebrow">Section 08 · The Addressable Universe</div>
+        <h2 class="title-page">The Distribution Ecosystem<br><em>Stablecoins &amp; Neobank Cards</em></h2>
+      </div>
+      <div class="meta-compact">P. 06 / 06</div>
+    </div>
+
+    <p class="body">
+      The MCC proposal is not theoretical — the distribution and issuance infrastructure already exists. Below is the addressable universe at GENIUS effective date: <strong>five US-domiciled stablecoins on the PPSI track</strong> feeding into <strong>21+ crypto-native neobank card programs</strong> covering tens of millions of users. The pilot starts narrow and broadens as data accumulates.
+    </p>
+
+    <!-- STABLECOINS -->
+    <div class="eco-section">
+      <div class="section-label green">GENIUS-Track Stablecoin Issuers (PPSI Candidates)</div>
+      <div class="eco-section-sub">US-domiciled, pursuing OCC or qualifying state PPSI status under the GENIUS Act framework. All five are technically eligible for the proposed MCC sub-classification on Day 1 of the effective date.</div>
+
+      <div class="stable-showcase-text">
+        <div class="stable-card-text">
+          <div class="stable-ticker">USDC</div>
+          <div class="stable-issuer-text">Circle</div>
+          <div class="stable-detail">~$60B supply</div>
+        </div>
+        <div class="stable-card-text">
+          <div class="stable-ticker">USAT</div>
+          <div class="stable-issuer-text">Tether US</div>
+          <div class="stable-detail">Cantor · Anchorage</div>
+        </div>
+        <div class="stable-card-text">
+          <div class="stable-ticker">PYUSD</div>
+          <div class="stable-issuer-text">PayPal</div>
+          <div class="stable-detail">Paxos issuer</div>
+        </div>
+        <div class="stable-card-text">
+          <div class="stable-ticker">RLUSD</div>
+          <div class="stable-issuer-text">Ripple</div>
+          <div class="stable-detail">NYDFS chartered</div>
+        </div>
+        <div class="stable-card-text">
+          <div class="stable-ticker">XO Cash</div>
+          <div class="stable-issuer-text">Exodus</div>
+          <div class="stable-detail">MoonPay-powered</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- NEOBANK CARDS -->
+    <div class="eco-section">
+      <div class="section-label">Crypto Neobank Card Programs (Distribution Endpoints)</div>
+      <div class="eco-section-sub">Source: Paymentscan.xyz. Every program below is a candidate on-ramp partner and pilot participant. Coverage spans Tier-1 consumer wallets (MetaMask, Bitget) to vertically integrated neobanks (KAST, RedotPay) to L1-native cards (Avalanche, Solflare, Plasma One).</div>
+
+      <div class="wallet-grid-text">
+        <div class="wallet-text-tile">RedotPay</div>
+        <div class="wallet-text-tile">KAST</div>
+        <div class="wallet-text-tile">EtherFi</div>
+        <div class="wallet-text-tile">Tria</div>
+        <div class="wallet-text-tile">Cypher</div>
+        <div class="wallet-text-tile">Karta</div>
+        <div class="wallet-text-tile">Gnosis</div>
+        <div class="wallet-text-tile">Ready</div>
+        <div class="wallet-text-tile">BFinance</div>
+        <div class="wallet-text-tile">MetaMask</div>
+        <div class="wallet-text-tile">Holyheld</div>
+        <div class="wallet-text-tile">Bitget Wallet</div>
+        <div class="wallet-text-tile">Avici</div>
+        <div class="wallet-text-tile">SafePal</div>
+        <div class="wallet-text-tile">Avalanche Card</div>
+        <div class="wallet-text-tile">Tuyo</div>
+        <div class="wallet-text-tile">Solayer</div>
+        <div class="wallet-text-tile">Solflare</div>
+        <div class="wallet-text-tile">Exa</div>
+        <div class="wallet-text-tile">Hyperbeat</div>
+        <div class="wallet-text-tile">Plasma One</div>
+      </div>
+    </div>
+
+    <div class="callout" style="margin-top: 10px;">
+      <strong>The volume math.</strong> If even one-third of the wallet programs above adopt MoonPay as preferred on-ramp at GENIUS effective date, the volume routed through the proposed MCC sub-class on Day 1 exceeds <em>$10B annualized</em> — enough scale for the empirical case to Visa and Mastercard to be undeniable within two quarters of operation. <strong>Distribution is the moat.</strong> The MCC reform thesis is also the strategy that makes MoonPay the default on-ramp for the entire crypto-card ecosystem.
+    </div>
+  </div>
+
+  <footer class="footer">
+    <span>moonpay // partnerships</span>
+    <span>distribution ecosystem</span>
+    <span>page 06 of 06</span>
+  </footer>
+</section>
+
+</body>
+</html>
